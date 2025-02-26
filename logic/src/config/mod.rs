@@ -1,2 +1,4 @@
-pub mod toml_parser;
-pub mod api;
+mod toml_parser;
+mod api;
+
+pub use api::tmdb_table::TmdbConfig;
