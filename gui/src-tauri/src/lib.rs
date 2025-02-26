@@ -14,9 +14,8 @@ fn hello_world() -> String {
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet])
-        .invoke_handler(tauri::generate_handler![hello_world])
-        .setup(|app| {
+        .invoke_handler(tauri::generate_handler![hello_world, greet])
+        .setup(|_| {
             let message = logic::hello_world();
             println!("{}", message);
             Ok(())

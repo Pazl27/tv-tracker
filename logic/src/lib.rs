@@ -1,6 +1,4 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+mod config;
 
 pub fn hello_world() -> String {
     "Hello, world from the logic crate!".to_string()
@@ -11,8 +9,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+    fn test_hello_world() {
+        assert_eq!(hello_world(), "Hello, world from the logic crate!");
     }
 }

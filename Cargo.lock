@@ -2041,6 +2041,12 @@ checksum = "30bde2b3dc3671ae49d8e2e9f044c7c005836e7a023ee57cffa25ab82764bb9e"
 [[package]]
 name = "logic"
 version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "dirs 6.0.0",
+ "serde",
+ "toml 0.8.20",
+]
 
 [[package]]
 name = "mac"
