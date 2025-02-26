@@ -10,11 +10,16 @@ fn hello_world() -> String {
     logic::hello_world()
 }
 
+#[tauri::command]
+fn api() -> String {
+    logic::api_key()
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![hello_world, greet])
+        .invoke_handler(tauri::generate_handler![hello_world, greet, api])
         .setup(|_| {
             let message = logic::hello_world();
             println!("{}", message);

@@ -5,6 +5,7 @@ import { invoke } from "@tauri-apps/api/core";
 const greetMsg = ref("");
 const name = ref("");
 const helloWorldMsg = ref("");
+const api = ref("");
 
 async function greet() {
   // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
@@ -16,8 +17,14 @@ async function helloWorld() {
   helloWorldMsg.value = response;
 }
 
+async function api_stuff() {
+  const response = await invoke("api");
+  api.value = response;
+}
+
 onMounted(() => {
   helloWorld();
+  api_stuff();
 });
 </script>
 
@@ -44,6 +51,7 @@ onMounted(() => {
     </form>
     <p>{{ greetMsg }}</p>
     <p>{{ helloWorldMsg }}</p>
+    <p>{{ api }}</p>
   </main>
 </template>
 

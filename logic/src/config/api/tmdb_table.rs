@@ -1,14 +1,14 @@
-use anyhow::{Result, Context, anyhow};
+use anyhow::{anyhow, Context, Result};
 
 use crate::config::toml_parser::{ConfigToml, TmdbTable};
 
-pub struct Tmdb {
+pub struct TmdbConfig {
     api_key: String,
 }
 
-impl Tmdb {
+impl TmdbConfig {
     fn new(api_key: String) -> Self {
-        Tmdb { api_key }
+        TmdbConfig { api_key }
     }
 
     fn initialize() -> Result<Self> {
@@ -17,15 +17,24 @@ impl Tmdb {
             .get_tmdb()
             .context("Failed to get TMDB table")?;
 
-        let api_key = tmdb_table.api_key.ok_or_else(|| anyhow!("API key is missing"))?;
-        api_key.is_empty().then(|| Err::<(), _>(anyhow!("API key is empty"))).transpose()?;
+        let api_key = tmdb_table
+            .api_key
+            .ok_or_else(|| anyhow!("API key is missing"))?;
+        api_key
+            .is_empty()
+            .then(|| Err::<(), _>(anyhow!("API key is empty")))
+            .transpose()?;
 
-        Ok(Tmdb::new(api_key))
+        Ok(TmdbConfig::new(api_key))
+    }
+
+    pub fn api_key(&self) -> String {
+        self.api_key.clone()
     }
 }
 
-impl Default for Tmdb {
+impl Default for TmdbConfig {
     fn default() -> Self {
-        Tmdb::initialize().expect("Failed to initialize Tmdb")
+        TmdbConfig::initialize().expect("Failed to initialize Tmdb")
     }
 }

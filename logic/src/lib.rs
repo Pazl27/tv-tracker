@@ -1,7 +1,15 @@
 mod config;
+mod api;
+
+use crate::config::api::TmdbConfig;
 
 pub fn hello_world() -> String {
     "Hello, world from the logic crate!".to_string()
+}
+
+pub fn api_key() -> String {
+    let config_tmdb = TmdbConfig::default();
+    config_tmdb.api_key()
 }
 
 #[cfg(test)]

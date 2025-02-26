@@ -1,3 +1,3 @@
 mod tmdb_table;
 
-pub use tmdb_table::Tmdb;
+pub use tmdb_table::TmdbConfig;
