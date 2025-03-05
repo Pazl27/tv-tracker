@@ -1,178 +1,149 @@
-<script setup lang="ts">
-import { ref, onMounted } from "vue";
+<template>
+  <div>
+    <!-- Tab Bar -->
+    <div class="tabbar">
+      <button
+        :class="{ active: activeTab === 'movies' }"
+        @click="switchTab('movies')"
+      >
+        Movies
+      </button>
+      <button
+        :class="{ active: activeTab === 'tvShows' }"
+        @click="switchTab('tvShows')"
+      >
+        TV Shows
+      </button>
+    </div>
+
+    <!-- Movie or TV Show Grid -->
+    <div v-if="activeTab === 'movies'" class="movie-grid">
+      <div class="movie-card" v-for="movie in movies" :key="movie.id">
+        <img :src="movie.poster_url" :alt="movie.title" class="movie-poster" />
+        <h3 class="movie-title">{{ movie.title }}</h3>
+      </div>
+    </div>
+
+    <div v-if="activeTab === 'tvShows'" class="movie-grid">
+      <div class="movie-card" v-for="show in tvShows" :key="show.id">
+        <img :src="show.poster_url" :alt="show.title" class="movie-poster" />
+        <h3 class="movie-title">{{ show.name }}</h3>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script lang="ts" setup>
+import { ref, onMounted } from 'vue';
 import { invoke } from "@tauri-apps/api/core";
 
-const greetMsg = ref("");
-const name = ref("");
-const helloWorldMsg = ref("");
-const api = ref("");
-
-async function greet() {
-  // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-  greetMsg.value = await invoke("greet", { name: name.value });
+interface Movie {
+  id: number;
+  title: string;
+  poster_path: string;
+  poster_url: string;
 }
 
-async function helloWorld() {
-  const response = await invoke("hello_world");
-  helloWorldMsg.value = response;
+interface TvShow {
+  id: number;
+  name: string;
+  poster_path: string;
+  poster_url: string;
 }
 
-async function api_stuff() {
-  const response = await invoke("api");
-  api.value = response;
-}
+const activeTab = ref('movies');
+const movies = ref<Movie[]>([]);
+const tvShows = ref<TvShow[]>([]);
 
-onMounted(() => {
-  helloWorld();
-  api_stuff();
+// Function to switch tabs
+const switchTab = async (tab: string) => {
+  activeTab.value = tab;
+
+  if (tab === 'movies') {
+    await fetchMovies();
+  } else if (tab === 'tvShows') {
+    await fetchTvShows();
+  }
+};
+
+// Fetch trending movies
+const fetchMovies = async () => {
+  try {
+    const result: Movie[] = await invoke('get_trending_movies');
+    movies.value = result.map((movie) => ({
+      ...movie,
+      poster_url: `https://image.tmdb.org/t/p/original${movie.poster_path}`,
+    }));
+  } catch (error) {
+    console.error('Failed to fetch trending movies:', error);
+  }
+};
+
+// Fetch trending TV shows
+const fetchTvShows = async () => {
+  try {
+    const result: TvShow[] = await invoke('get_trending_tv');
+    tvShows.value = result.map((show) => ({
+      ...show,
+      poster_url: `https://image.tmdb.org/t/p/original${show.poster_path}`,
+    }));
+  } catch (error) {
+    console.error('Failed to fetch trending TV shows:', error);
+  }
+};
+
+// Fetch initial data when component mounts
+onMounted(async () => {
+  await fetchMovies(); // Default to fetching movies
 });
 </script>
 
-<template>
-  <main class="container">
-    <h1>Welcome to Tauri + Vue</h1>
-
-    <div class="row">
-      <a href="https://vitejs.dev" target="_blank">
-        <img src="/vite.svg" class="logo vite" alt="Vite logo" />
-      </a>
-      <a href="https://tauri.app" target="_blank">
-        <img src="/tauri.svg" class="logo tauri" alt="Tauri logo" />
-      </a>
-      <a href="https://vuejs.org/" target="_blank">
-        <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-      </a>
-    </div>
-    <p>Click on the Tauri, Vite, and Vue logos to learn more.</p>
-
-    <form class="row" @submit.prevent="greet">
-      <input id="greet-input" v-model="name" placeholder="Enter a name..." />
-      <button type="submit">Greet</button>
-    </form>
-    <p>{{ greetMsg }}</p>
-    <p>{{ helloWorldMsg }}</p>
-    <p>{{ api }}</p>
-  </main>
-</template>
-
 <style scoped>
-.logo.vite:hover {
-  filter: drop-shadow(0 0 2em #747bff);
-}
-
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #249b73);
-}
-</style>
-
-<style>
-:root {
-  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
-  font-size: 16px;
-  line-height: 24px;
-  font-weight: 400;
-
-  color: #0f0f0f;
-  background-color: #f6f6f6;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
-}
-
-.container {
-  margin: 0;
-  padding-top: 10vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  text-align: center;
-}
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: 0.75s;
-}
-
-.logo.tauri:hover {
-  filter: drop-shadow(0 0 2em #24c8db);
-}
-
-.row {
+/* Tab Bar */
+.tabbar {
   display: flex;
   justify-content: center;
+  margin-bottom: 16px;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-
-a:hover {
-  color: #535bf2;
-}
-
-h1 {
-  text-align: center;
-}
-
-input,
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  color: #0f0f0f;
-  background-color: #ffffff;
-  transition: border-color 0.25s;
-  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
-}
-
-button {
+.tabbar button {
+  padding: 8px 16px;
+  margin: 0 8px;
   cursor: pointer;
+  border: none;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  font-size: 16px;
 }
 
-button:hover {
-  border-color: #396cd8;
-}
-button:active {
-  border-color: #396cd8;
-  background-color: #e8e8e8;
+.tabbar button.active {
+  background-color: #007bff;
+  color: white;
 }
 
-input,
-button {
-  outline: none;
+/* Movie Grid */
+.movie-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
-#greet-input {
-  margin-right: 5px;
+.movie-card {
+  flex: 1 1 calc(25% - 16px);
+  box-sizing: border-box;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  text-align: center;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    color: #f6f6f6;
-    background-color: #2f2f2f;
-  }
+.movie-poster {
+  width: 100%;
+  height: auto;
+}
 
-  a:hover {
-    color: #24c8db;
-  }
-
-  input,
-  button {
-    color: #ffffff;
-    background-color: #0f0f0f98;
-  }
-  button:active {
-    background-color: #0f0f0f69;
-  }
+.movie-title {
+  margin: 8px 0;
+  font-size: 16px;
 }
 </style>

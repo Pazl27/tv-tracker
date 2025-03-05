@@ -10,10 +10,11 @@ pub struct Movie {
     pub poster_path: String,
 }
 
-impl Movie {
-    pub fn poster_url(&self) -> String {
-        format!("https://image.tmdb.org/t/p/original{}", self.poster_path)
-    }
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Tv {
+    pub id: u32,
+    pub name: String,
+    pub poster_path: String,
 }
 
 pub struct Tmdb {
@@ -175,7 +176,47 @@ impl Tmdb {
             }).collect();
             return Some(movies);
         }
-
         None
+    }
+
+    pub async fn trending_tv(&self) -> Option<Vec<Tv>> {
+        let client = Client::new();
+        let url = format!("https://api.themoviedb.org/3/trending/tv/day?language=en-US");
+
+        let response = client
+            .get(&url)
+            .header("Authorization", format!("Bearer {}", self.api_key))
+            .header("accept", "application/json")
+            .send()
+            .await
+            .unwrap();
+
+        let response_text = response.text().await.unwrap();
+        let json: Value = serde_json::from_str(&response_text).unwrap();
+
+        if let Some(results) = json["results"].as_array() {
+            let shows: Vec<Tv> = results.iter().map(|movie| {
+                Tv {
+                    id: movie["id"].as_u64().unwrap() as u32,
+                    name: movie["name"].as_str().unwrap().to_string(),
+                    poster_path: movie["poster_path"].as_str().unwrap().to_string(),
+                }
+            }).collect();
+            return Some(shows);
+        }
+        None
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_trending() {
+        let tmdb = Tmdb::new(TmdbConfig::default());
+        let shows = tmdb.trending_tv().await.unwrap();
+
+        println!("{:?}", shows);
     }
 }

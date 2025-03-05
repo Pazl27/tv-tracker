@@ -1,3 +1,3 @@
 mod tmdb;
 
-pub use tmdb::Tmdb;
+pub use tmdb::*;

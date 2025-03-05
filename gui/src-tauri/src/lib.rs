@@ -1,30 +1,28 @@
-use logic;
-// Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
+use logic::api;
+
 #[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
+async fn get_trending_movies() -> Result<Vec<api::Movie>, String> {
+    let tmdb = api::Tmdb::new(logic::TmdbConfig::default());
+    match tmdb.trending_movies().await {
+        Some(movies) => Ok(movies),
+        None => Err("Failed to fetch trending movies".into()),
+    }
 }
 
 #[tauri::command]
-fn hello_world() -> String {
-    logic::hello_world()
-}
-
-#[tauri::command]
-fn api() -> String {
-    "test".to_string()
+async fn get_trending_tv() -> Result<Vec<api::Tv>, String> {
+    let tmdb = api::Tmdb::new(logic::TmdbConfig::default());
+    match tmdb.trending_tv().await {
+        Some(shows) => Ok(shows),
+        None => Err("Failed to fetch trending movies".into()),
+    }
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![hello_world, greet, api])
-        .setup(|_| {
-            let message = logic::hello_world();
-            println!("{}", message);
-            Ok(())
-        })
+        .invoke_handler(tauri::generate_handler![get_trending_movies, get_trending_tv])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
