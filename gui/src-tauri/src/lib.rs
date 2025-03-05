@@ -12,7 +12,7 @@ fn hello_world() -> String {
 
 #[tauri::command]
 fn api() -> String {
-    logic::api_key()
+    "test".to_string()
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]

@@ -1,6 +1,20 @@
 use crate::config::TmdbConfig;
 use reqwest::Client;
 use serde_json::Value;
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Movie {
+    pub id: u32,
+    pub title: String,
+    pub poster_path: String,
+}
+
+impl Movie {
+    pub fn poster_url(&self) -> String {
+        format!("https://image.tmdb.org/t/p/original{}", self.poster_path)
+    }
+}
 
 pub struct Tmdb {
     api_key: String,
@@ -131,6 +145,35 @@ impl Tmdb {
 
                 return Some(format!("https://image.tmdb.org/t/p/original{}", file_path));
             }
+        }
+
+        None
+    }
+
+    pub async fn trending_movies(&self) -> Option<Vec<Movie>> {
+        let client = Client::new();
+        let url = format!("https://api.themoviedb.org/3/trending/movie/day?language=en-US");
+
+        let response = client
+            .get(&url)
+            .header("Authorization", format!("Bearer {}", self.api_key))
+            .header("accept", "application/json")
+            .send()
+            .await
+            .unwrap();
+
+        let response_text = response.text().await.unwrap();
+        let json: Value = serde_json::from_str(&response_text).unwrap();
+
+        if let Some(results) = json["results"].as_array() {
+            let movies: Vec<Movie> = results.iter().map(|movie| {
+                Movie {
+                    id: movie["id"].as_u64().unwrap() as u32,
+                    title: movie["title"].as_str().unwrap().to_string(),
+                    poster_path: movie["poster_path"].as_str().unwrap().to_string(),
+                }
+            }).collect();
+            return Some(movies);
         }
 
         None
