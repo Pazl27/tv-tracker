@@ -26,7 +26,7 @@
 
     <div v-if="activeTab === 'tvShows'" class="movie-grid">
       <div class="movie-card" v-for="show in tvShows" :key="show.id">
-        <img :src="show.poster_url" :alt="show.title" class="movie-poster" />
+        <img :src="show.poster_url" :alt="show.name" class="movie-poster" />
         <h3 class="movie-title">{{ show.name }}</h3>
       </div>
     </div>
@@ -55,6 +55,10 @@ const activeTab = ref('movies');
 const movies = ref<Movie[]>([]);
 const tvShows = ref<TvShow[]>([]);
 
+// Cache key constants
+const MOVIES_CACHE_KEY = 'movies_cache';
+const TV_SHOWS_CACHE_KEY = 'tvShows_cache';
+
 // Function to switch tabs
 const switchTab = async (tab: string) => {
   activeTab.value = tab;
@@ -66,35 +70,58 @@ const switchTab = async (tab: string) => {
   }
 };
 
-// Fetch trending movies
+// Fetch trending movies with caching
 const fetchMovies = async () => {
-  try {
-    const result: Movie[] = await invoke('get_trending_movies');
-    movies.value = result.map((movie) => ({
-      ...movie,
-      poster_url: `https://image.tmdb.org/t/p/original${movie.poster_path}`,
-    }));
-  } catch (error) {
-    console.error('Failed to fetch trending movies:', error);
+  // Check if movies are cached
+  const cachedMovies = localStorage.getItem(MOVIES_CACHE_KEY);
+  if (cachedMovies) {
+    movies.value = JSON.parse(cachedMovies); 
+    console.log('Using cached movies');
+  } else {
+    // Fetch from API if not cached
+    try {
+      const result: Movie[] = await invoke('get_trending_movies');
+      movies.value = result.map((movie) => ({
+        ...movie,
+        poster_url: `https://image.tmdb.org/t/p/original${movie.poster_path}`,
+      }));
+
+      // Cache the movies
+      localStorage.setItem(MOVIES_CACHE_KEY, JSON.stringify(movies.value));
+      console.log('Fetched and cached movies');
+    } catch (error) {
+      console.error('Failed to fetch trending movies:', error);
+    }
   }
 };
 
-// Fetch trending TV shows
+// Fetch trending TV shows with caching
 const fetchTvShows = async () => {
-  try {
-    const result: TvShow[] = await invoke('get_trending_tv');
-    tvShows.value = result.map((show) => ({
-      ...show,
-      poster_url: `https://image.tmdb.org/t/p/original${show.poster_path}`,
-    }));
-  } catch (error) {
-    console.error('Failed to fetch trending TV shows:', error);
+  // Check if TV shows are cached
+  const cachedTvShows = localStorage.getItem(TV_SHOWS_CACHE_KEY);
+  if (cachedTvShows) {
+    tvShows.value = JSON.parse(cachedTvShows); 
+    console.log('Using cached TV shows');
+  } else {
+    // Fetch from API if not cached
+    try {
+      const result: TvShow[] = await invoke('get_trending_tv');
+      tvShows.value = result.map((show) => ({
+        ...show,
+        poster_url: `https://image.tmdb.org/t/p/original${show.poster_path}`,
+      }));
+
+      // Cache the TV shows
+      localStorage.setItem(TV_SHOWS_CACHE_KEY, JSON.stringify(tvShows.value));
+      console.log('Fetched and cached TV shows');
+    } catch (error) {
+      console.error('Failed to fetch trending TV shows:', error);
+    }
   }
 };
 
-// Fetch initial data when component mounts
 onMounted(async () => {
-  await fetchMovies(); // Default to fetching movies
+  await fetchMovies();
 });
 </script>
 
