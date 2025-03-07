@@ -1,6 +1,12 @@
 <template>
   <div class="movie-grid">
-    <div v-if="loading" class="skeleton-loader" v-for="n in 20" :key="n"></div>
+    <!-- Skeleton loaders with the same structure as movie cards -->
+    <div v-if="loading" class="skeleton-loader" v-for="n in 20" :key="n">
+      <div class="skeleton-poster"></div>
+      <div class="skeleton-title"></div>
+    </div>
+    
+    <!-- Movie Cards -->
     <div v-else class="movie-card" v-for="movie in movies" :key="movie.id">
       <img :src="movie.poster_url" :alt="movie.title" class="movie-poster" />
       <h3 class="movie-title">{{ movie.title }}</h3>
@@ -49,7 +55,8 @@ onMounted(loadMovies);
 
 .movie-poster {
   width: 100%;
-  height: auto;
+  height: 300px;
+  object-fit: cover;
 }
 
 .movie-title {
@@ -57,10 +64,22 @@ onMounted(loadMovies);
   font-size: 16px;
 }
 
+/* Skeleton Loader Styles */
 .skeleton-loader {
   background: #e0e0e0;
-  height: 300px; /* Adjust height as needed */
-  animation: pulse 1.5s infinite;
+}
+
+.skeleton-poster {
+  width: 100%;
+  height: 300px; /* Match the height of the image */
+  background: #f0f0f0;
+}
+
+.skeleton-title {
+  width: 60%;
+  height: 20px;
+  margin: 10px auto;
+  background: #f0f0f0;
 }
 
 @keyframes pulse {
