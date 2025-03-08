@@ -47,10 +47,19 @@ onMounted(loadTvShows);
 .movie-card, .skeleton-loader {
   flex: 1 1 calc(25% - 16px);
   box-sizing: border-box;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  border: 2px solid #fff;
+  border-radius: 3%;
+  background: #ddd;
   overflow: hidden;
   text-align: center;
+}
+
+.movie-card:hover {
+  border: 2px solid #009D1A;
+}
+
+.skeleton-loader:hover {
+  border: 2px solid #009D1A;
 }
 
 .movie-poster {
