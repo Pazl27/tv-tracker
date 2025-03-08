@@ -47,19 +47,19 @@ onMounted(loadTvShows);
 .movie-card, .skeleton-loader {
   flex: 1 1 calc(25% - 16px);
   box-sizing: border-box;
-  border: 2px solid #fff;
+  border: 2px solid var(--color-border);
   border-radius: 3%;
-  background: #ddd;
+  background: var(--color-background-dark);
   overflow: hidden;
   text-align: center;
 }
 
 .movie-card:hover {
-  border: 2px solid #009D1A;
+  border: 2px solid var(--color-border-hover);
 }
 
 .skeleton-loader:hover {
-  border: 2px solid #009D1A;
+  border: 2px solid var(--color-border-hover);
 }
 
 .movie-poster {
@@ -75,31 +75,31 @@ onMounted(loadTvShows);
 
 /* Skeleton Loader Styles */
 .skeleton-loader {
-  background: #e0e0e0;
+  background: var(--color-background-light);
 }
 
 .skeleton-poster {
   width: 100%;
   height: 300px; /* Match the height of the image */
-  background: #f0f0f0;
+  background: var(--color-background-dark);
 }
 
 .skeleton-title {
   width: 60%;
   height: 20px;
   margin: 10px auto;
-  background: #f0f0f0;
+  background: var(--color-background-dark);
 }
 
 @keyframes pulse {
   0% {
-    background-color: #e0e0e0;
+    background-color: var(--color-background-light);
   }
   50% {
-    background-color: #f0f0f0;
+    background-color: var(--color-background-dark);
   }
   100% {
-    background-color: #e0e0e0;
+    background-color: var(--color-background-light);
   }
 }
 </style>
