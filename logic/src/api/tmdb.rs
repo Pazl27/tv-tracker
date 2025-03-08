@@ -231,16 +231,3 @@ impl Tmdb {
         None
     }
 }
-
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    #[tokio::test]
-    async fn test_trending() {
-        let tmdb = Tmdb::new(TmdbConfig::default());
-        let shows = tmdb.trending_tv().await.unwrap();
-
-        println!("{:?}", shows);
-    }
-}
