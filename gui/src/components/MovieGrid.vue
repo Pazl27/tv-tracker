@@ -80,7 +80,7 @@ onMounted(loadMovies);
 
 .skeleton-poster {
   width: 100%;
-  height: 300px; /* Match the height of the image */
+  height: 300px; 
   background: var(--color-background-dark);
 }
 
