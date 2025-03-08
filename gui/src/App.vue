@@ -35,6 +35,12 @@ const switchTab = (tab: string) => {
 };
 
 const saveApiKey = async () => {
+  try {
+    await invoke('add_api_key', { key: apiKey.value });
+  } catch (error) {
+    alert('Something went wrong saving the API key')
+  }
+
   const isValid = await invoke('valid_key', { apiKey: apiKey.value }).catch(() => false);
   if (isValid) {
     showApiKeyInput.value = false;

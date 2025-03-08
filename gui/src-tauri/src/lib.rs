@@ -1,4 +1,3 @@
-use anyhow::Result;
 use logic::api;
 
 #[tauri::command]
@@ -25,6 +24,12 @@ async fn valid_key() -> Result<bool, String> {
     tmdb.valid_key().await.map_err(|e| e.to_string())
 }
 
+#[tauri::command]
+async fn add_api_key(key: String) -> Result<(), String> {
+    logic::config::write_api_key_to_config(&key).map_err(|e| e.to_string())?;
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -33,6 +38,7 @@ pub fn run() {
             get_trending_movies,
             get_trending_tv,
             valid_key,
+            add_api_key,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
