@@ -35,7 +35,14 @@ const switchTab = (tab: string) => {
 };
 
 const saveApiKey = async () => {
-  showApiKeyInput.value = false;
+  const isValid = await invoke('valid_key', { apiKey: apiKey.value }).catch(() => false);
+  if (isValid) {
+    showApiKeyInput.value = false;
+    // Save the new API key logic here
+    // For example, you can save it to local storage or send it to the backend
+  } else {
+    alert('Invalid API Key, please try again.');
+  }
 };
 
 onMounted(async () => {
