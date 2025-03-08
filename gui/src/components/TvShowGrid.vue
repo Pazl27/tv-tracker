@@ -1,6 +1,13 @@
 <template>
   <div class="movie-grid">
-    <div class="movie-card" v-for="show in tvShows" :key="show.id">
+    <!-- Skeleton loaders with the same structure as TV show cards -->
+    <div v-if="loading" class="skeleton-loader" v-for="n in 20" :key="n">
+      <div class="skeleton-poster"></div>
+      <div class="skeleton-title"></div>
+    </div>
+    
+    <!-- TV Show Cards -->
+    <div v-else class="movie-card" v-for="show in tvShows" :key="show.id">
       <img :src="show.poster_url" :alt="show.name" class="movie-poster" />
       <h3 class="movie-title">{{ show.name }}</h3>
     </div>
@@ -13,6 +20,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { fetchTvShows } from '../services/tmdbService';
 
 const tvShows = ref<any[]>([]);
+const loading = ref(true);
 
 // Fetch trending TV shows
 const loadTvShows = async () => {
@@ -20,6 +28,8 @@ const loadTvShows = async () => {
     tvShows.value = await fetchTvShows(invoke);
   } catch (error) {
     console.error('Failed to load TV shows:', error);
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -34,22 +44,62 @@ onMounted(loadTvShows);
   gap: 16px;
 }
 
-.movie-card {
+.movie-card, .skeleton-loader {
   flex: 1 1 calc(25% - 16px);
   box-sizing: border-box;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  border: 2px solid var(--color-border);
+  border-radius: 3%;
+  background: var(--color-background-dark);
   overflow: hidden;
   text-align: center;
 }
 
+.movie-card:hover {
+  border: 2px solid var(--color-border-hover);
+}
+
+.skeleton-loader:hover {
+  border: 2px solid var(--color-border-hover);
+}
+
 .movie-poster {
   width: 100%;
-  height: auto;
+  height: 300px;
+  object-fit: cover;
 }
 
 .movie-title {
   margin: 8px 0;
   font-size: 16px;
+}
+
+/* Skeleton Loader Styles */
+.skeleton-loader {
+  background: var(--color-background-light);
+}
+
+.skeleton-poster {
+  width: 100%;
+  height: 300px;
+  background: var(--color-background-dark);
+}
+
+.skeleton-title {
+  width: 60%;
+  height: 20px;
+  margin: 10px auto;
+  background: var(--color-background-dark);
+}
+
+@keyframes pulse {
+  0% {
+    background-color: var(--color-background-light);
+  }
+  50% {
+    background-color: var(--color-background-dark);
+  }
+  100% {
+    background-color: var(--color-background-light);
+  }
 }
 </style>
