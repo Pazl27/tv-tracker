@@ -15,6 +15,7 @@ name = "gui_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [dependencies]
+anyhow.workspace = true
 tauri.workspace = true
 tauri-plugin-opener.workspace = true
 serde.workspace = true
