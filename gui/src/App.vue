@@ -9,7 +9,7 @@
     <div :class="{ blurred: showApiKeyInput }">
       <TabBar :activeTab="activeTab" @tab-switched="switchTab" @search-input="handleSearchInput" />
       <MovieGrid v-if="activeTab === 'movies'" :key="movieGridKey" :initialMovies="movies" />
-      <TvShowGrid v-if="activeTab === 'tvShows'" />
+      <TvShowGrid v-if="activeTab === 'tvShows'" :initialTvShows="tvShows" />
     </div>
   </div>
 </template>

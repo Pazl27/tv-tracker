@@ -15,11 +15,14 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { invoke } from "@tauri-apps/api/core";
 import { fetchTvShows } from '../services/tmdbService';
+import { defineProps } from 'vue';
 
-const tvShows = ref<any[]>([]);
+const props = defineProps<{ initialTvShows: any[] }>();
+
+const tvShows = ref<any[]>(props.initialTvShows || []);
 const loading = ref(true);
 
 // Fetch trending TV shows
@@ -34,7 +37,21 @@ const loadTvShows = async () => {
 };
 
 // Fetch initial TV shows when component mounts
-onMounted(loadTvShows);
+onMounted(() => {
+  if (tvShows.value.length === 0) {
+    loadTvShows();
+  } else {
+    loading.value = false;
+  }
+});
+
+// Watch for changes in initialTvShows prop
+watch(() => props.initialTvShows, (newTvShows) => {
+  if (newTvShows && newTvShows.length > 0) {
+    tvShows.value = newTvShows;
+    loading.value = false;
+  }
+});
 </script>
 
 <style scoped>
@@ -81,7 +98,7 @@ onMounted(loadTvShows);
 .skeleton-poster {
   width: 100%;
   height: 300px;
-  background: var(--color-background-dark);
+  background: var (--color-background-dark);
 }
 
 .skeleton-title {
