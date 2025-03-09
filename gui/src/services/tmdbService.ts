@@ -76,3 +76,17 @@ export const fetchTvShows = async (invokeFunction: any) => {
     return [];
   }
 };
+
+export const searchMovies = async (invokeFunction: any, query: string) => {
+  try {
+    const result: any[] = await invokeFunction('search_movies', { query });
+    return result.map((movie: any) => ({
+      ...movie,
+      poster_url: `https://image.tmdb.org/t/p/original${movie.poster_path}`,
+    }));
+
+  } catch (error) {
+    console.error('Failed to search movies:', error);
+    return [];
+  }
+}

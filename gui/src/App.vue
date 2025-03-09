@@ -12,8 +12,8 @@
       </div>
     </div>
     <div :class="{ blurred: showApiKeyInput }">
-      <TabBar :activeTab="activeTab" @tab-switched="switchTab" />
-      <MovieGrid v-if="activeTab === 'movies'" :key="movieGridKey" />
+      <TabBar :activeTab="activeTab" @tab-switched="switchTab" @search-input="handleSearchInput" />
+      <MovieGrid v-if="activeTab === 'movies'" :key="movieGridKey" :initialMovies="movies"/>
       <TvShowGrid v-if="activeTab === 'tvShows'" />
     </div>
   </div>
@@ -25,11 +25,15 @@ import { invoke } from "@tauri-apps/api/core";
 import MovieGrid from './components/MovieGrid.vue';
 import TvShowGrid from './components/TvShowGrid.vue';
 import TabBar from './components/TabBar.vue';
+import { searchMovies } from './services/tmdbService';
 
 const activeTab = ref('movies');
 const showApiKeyInput = ref(false);
 const apiKey = ref('');
 const movieGridKey = ref(0);
+const searchQuery = ref('');
+const movies = ref([]);
+const tvShows = ref([]);
 
 const switchTab = (tab: string) => {
   activeTab.value = tab;
@@ -50,6 +54,28 @@ const saveApiKey = async () => {
     alert('Invalid API Key, please try again.');
   }
 };
+
+const handleSearchInput = (query: string) => {
+  searchQuery.value = query;
+
+  if (activeTab.value === 'movies') {
+    searchMoviesHandler(query);
+  } else {
+    searchTvShows(query);
+  }
+};
+
+const searchMoviesHandler = async (query: string) => {
+  try {
+    movies.value = await searchMovies(invoke, query);
+  } catch (error) {
+    console.error('Failed to search movies:', error);
+  }
+};
+
+const searchTvShows = async (query: string) => {
+  tvShows.value = await invoke('search_tv_shows', { query }).catch(() => []);
+}
 
 onMounted(async () => {
   const isValid = await invoke('valid_key').catch(() => false);

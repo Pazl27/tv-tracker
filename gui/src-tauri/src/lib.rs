@@ -31,7 +31,7 @@ async fn add_api_key(key: String) -> Result<(), String> {
 }
 
 #[tauri::command]
-async fn search_movie(query: String) -> Result<Vec<api::Movie>, String> {
+async fn search_movies(query: String) -> Result<Vec<api::Movie>, String> {
     let tmdb = api::Tmdb::new(logic::TmdbConfig::default());
     match tmdb.find_movies(&query).await {
         Some(movies) => Ok(movies),
@@ -57,7 +57,7 @@ pub fn run() {
             get_trending_tv,
             valid_key,
             add_api_key,
-            search_movie,
+            search_movies,
             search_tv,
         ])
         .run(tauri::generate_context!())

@@ -6,7 +6,7 @@
         v-model="searchQuery"
         type="text"
         placeholder="Search..."
-        @input="onSearchInput"
+        @keydown.enter="onSearchInput"
       />
     </div>
 
