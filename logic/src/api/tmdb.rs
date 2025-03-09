@@ -1,7 +1,9 @@
-use crate::config::TmdbConfig;
+use anyhow::{Context, Result};
 use reqwest::Client;
-use serde_json::Value;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
+
+use crate::config::TmdbConfig;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Movie {
@@ -26,6 +28,26 @@ impl Tmdb {
         Tmdb {
             api_key: config.api_key(),
         }
+    }
+
+    pub async fn valid_key(&self) -> Result<bool> {
+        let client = Client::new();
+        let url = "https://api.themoviedb.org/3/authentication";
+        let response = client
+            .get(url)
+            .header("Authorization", format!("Bearer {}", self.api_key))
+            .header("accept", "application/json")
+            .send()
+            .await
+            .context("Failed to send request")?;
+
+        let response_text = response
+            .text()
+            .await
+            .context("Failed to read response text")?;
+        let json: Value = serde_json::from_str(&response_text).context("Failed to parse JSON")?;
+
+        Ok(json["success"].as_bool().unwrap_or(false))
     }
 
     pub async fn find_movies(&self, query: &str) {
@@ -167,13 +189,14 @@ impl Tmdb {
         let json: Value = serde_json::from_str(&response_text).unwrap();
 
         if let Some(results) = json["results"].as_array() {
-            let movies: Vec<Movie> = results.iter().map(|movie| {
-                Movie {
+            let movies: Vec<Movie> = results
+                .iter()
+                .map(|movie| Movie {
                     id: movie["id"].as_u64().unwrap() as u32,
                     title: movie["title"].as_str().unwrap().to_string(),
                     poster_path: movie["poster_path"].as_str().unwrap().to_string(),
-                }
-            }).collect();
+                })
+                .collect();
             return Some(movies);
         }
         None
@@ -195,28 +218,16 @@ impl Tmdb {
         let json: Value = serde_json::from_str(&response_text).unwrap();
 
         if let Some(results) = json["results"].as_array() {
-            let shows: Vec<Tv> = results.iter().map(|movie| {
-                Tv {
+            let shows: Vec<Tv> = results
+                .iter()
+                .map(|movie| Tv {
                     id: movie["id"].as_u64().unwrap() as u32,
                     name: movie["name"].as_str().unwrap().to_string(),
                     poster_path: movie["poster_path"].as_str().unwrap().to_string(),
-                }
-            }).collect();
+                })
+                .collect();
             return Some(shows);
         }
         None
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    #[tokio::test]
-    async fn test_trending() {
-        let tmdb = Tmdb::new(TmdbConfig::default());
-        let shows = tmdb.trending_tv().await.unwrap();
-
-        println!("{:?}", shows);
     }
 }

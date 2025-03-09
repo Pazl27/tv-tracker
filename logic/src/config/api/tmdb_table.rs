@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result};
 
 use crate::config::toml_parser::{ConfigToml, TmdbTable};
 
@@ -17,13 +17,7 @@ impl TmdbConfig {
             .get_tmdb()
             .context("Failed to get TMDB table")?;
 
-        let api_key = tmdb_table
-            .api_key
-            .ok_or_else(|| anyhow!("API key is missing"))?;
-        api_key
-            .is_empty()
-            .then(|| Err::<(), _>(anyhow!("API key is empty")))
-            .transpose()?;
+        let api_key = tmdb_table.api_key.unwrap_or_else(|| "".to_owned());
 
         Ok(TmdbConfig::new(api_key))
     }
