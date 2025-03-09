@@ -25,7 +25,7 @@ import { invoke } from "@tauri-apps/api/core";
 import MovieGrid from './components/MovieGrid.vue';
 import TvShowGrid from './components/TvShowGrid.vue';
 import TabBar from './components/TabBar.vue';
-import { searchMovies } from './services/tmdbService';
+import { searchMovies, searchShows } from './services/tmdbService';
 
 const activeTab = ref('movies');
 const showApiKeyInput = ref(false);
