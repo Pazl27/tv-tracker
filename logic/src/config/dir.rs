@@ -1,4 +1,5 @@
 use dirs::home_dir;
+use anyhow::{Result, Context};
 use std::path::PathBuf;
 
 pub fn get_config_path() -> PathBuf {
@@ -16,8 +17,13 @@ pub fn config_dir_exists() -> Option<PathBuf> {
     }
 }
 
-pub fn create_config_dir() {
+pub fn create_config_dir() -> Result<()> {
     let path = get_config_path();
-    std::fs::create_dir_all(path.parent().expect("Failed to get parent directory"))
-        .expect("Failed to create config directory");
+    std::fs::create_dir_all(path.parent().context("Failed to get parent directory")?)?;
+
+    //WORKAROUND: write to file this [tmdb]
+    let content = "[tmdb]";
+    std::fs::write(path, content).context("Failed to write to config file")?;
+
+    Ok(())
 }
