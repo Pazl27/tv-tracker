@@ -13,7 +13,7 @@
     </div>
     <div :class="{ blurred: showApiKeyInput }">
       <TabBar :activeTab="activeTab" @tab-switched="switchTab" />
-      <MovieGrid v-if="activeTab === 'movies'" />
+      <MovieGrid v-if="activeTab === 'movies'" :key="movieGridKey" />
       <TvShowGrid v-if="activeTab === 'tvShows'" />
     </div>
   </div>
@@ -29,6 +29,7 @@ import TabBar from './components/TabBar.vue';
 const activeTab = ref('movies');
 const showApiKeyInput = ref(false);
 const apiKey = ref('');
+const movieGridKey = ref(0);
 
 const switchTab = (tab: string) => {
   activeTab.value = tab;
@@ -38,14 +39,13 @@ const saveApiKey = async () => {
   try {
     await invoke('add_api_key', { key: apiKey.value });
   } catch (error) {
-    alert('Something went wrong saving the API key')
+    alert('Something went wrong saving the API key');
   }
 
   const isValid = await invoke('valid_key', { apiKey: apiKey.value }).catch(() => false);
   if (isValid) {
     showApiKeyInput.value = false;
-    // Save the new API key logic here
-    // For example, you can save it to local storage or send it to the backend
+    movieGridKey.value += 1; 
   } else {
     alert('Invalid API Key, please try again.');
   }
