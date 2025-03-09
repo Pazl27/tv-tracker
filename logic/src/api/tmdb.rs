@@ -110,7 +110,7 @@ impl Tmdb {
 
         if let Some(results) = json["results"].as_array() {
             for show in results {
-                let title = show["original_title"].as_str().unwrap_or("N/A");
+                let title = show["original_name"].as_str().unwrap_or("N/A");
                 let id = show["id"].as_i64().unwrap_or(0);
                 let poster_path = show["poster_path"].as_str().unwrap_or("");
                 shows.push(Tv {

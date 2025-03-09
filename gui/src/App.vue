@@ -2,18 +2,13 @@
   <div>
     <div v-if="showApiKeyInput" class="overlay">
       <div class="api-key-input-container">
-        <input
-          type="text"
-          v-model="apiKey"
-          placeholder="Invalid API Key, please enter a valid one"
-          @keyup.enter="saveApiKey"
-          class="api-key-input"
-        />
+        <input type="text" v-model="apiKey" placeholder="Invalid API Key, please enter a valid one"
+          @keyup.enter="saveApiKey" class="api-key-input" />
       </div>
     </div>
     <div :class="{ blurred: showApiKeyInput }">
       <TabBar :activeTab="activeTab" @tab-switched="switchTab" @search-input="handleSearchInput" />
-      <MovieGrid v-if="activeTab === 'movies'" :key="movieGridKey" :initialMovies="movies"/>
+      <MovieGrid v-if="activeTab === 'movies'" :key="movieGridKey" :initialMovies="movies" />
       <TvShowGrid v-if="activeTab === 'tvShows'" />
     </div>
   </div>
@@ -49,7 +44,7 @@ const saveApiKey = async () => {
   const isValid = await invoke('valid_key', { apiKey: apiKey.value }).catch(() => false);
   if (isValid) {
     showApiKeyInput.value = false;
-    movieGridKey.value += 1; 
+    movieGridKey.value += 1;
   } else {
     alert('Invalid API Key, please try again.');
   }
@@ -61,7 +56,7 @@ const handleSearchInput = (query: string) => {
   if (activeTab.value === 'movies') {
     searchMoviesHandler(query);
   } else {
-    searchTvShows(query);
+    searchTvShowsHandler(query);
   }
 };
 
@@ -73,8 +68,13 @@ const searchMoviesHandler = async (query: string) => {
   }
 };
 
-const searchTvShows = async (query: string) => {
-  tvShows.value = await invoke('search_tv_shows', { query }).catch(() => []);
+const searchTvShowsHandler = async (query: string) => {
+  try {
+    tvShows.value = await searchShows(invoke, query);
+    console.log(tvShows.value);
+  } catch (error) {
+    console.error('Failed to search TV shows:', error);
+  }
 }
 
 onMounted(async () => {
