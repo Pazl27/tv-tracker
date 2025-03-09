@@ -20,9 +20,9 @@ import { invoke } from "@tauri-apps/api/core";
 import { fetchMovies } from '../services/tmdbService';
 import { defineProps } from 'vue';
 
-const props = defineProps<{ initialMovies: any[] }>();
+const props = defineProps<{ searchedMovies: any[] }>();
 
-const movies = ref<any[]>(props.initialMovies || []);
+const movies = ref<any[]>(props.searchedMovies || []);
 const loading = ref(true);
 
 // Fetch trending movies
@@ -44,7 +44,7 @@ onMounted(() => {
   }
 });
 
-watch(() => props.initialMovies, (newMovies) => {
+watch(() => props.searchedMovies, (newMovies) => {
   if (newMovies && newMovies.length > 0) {
     movies.value = newMovies;
     loading.value = false;
