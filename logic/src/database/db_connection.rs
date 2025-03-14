@@ -26,7 +26,7 @@ impl Sqlight {
         instance.get_or_init(|| {
             create_directory(&db_path);
 
-            let db_path = db_path.join("tv-tracker.db");
+            let db_path = db_path.join("tv_tracker.db");
 
             let conn = Connection::open(db_path).expect("Failed to open the database");
 
@@ -55,7 +55,7 @@ impl Sqlight {
                     id INTEGER PRIMARY KEY,
                     name TEXT NOT NULL,
                     poster_url TEXT NOT NULL,
-                    rating REAL CHECK (rating > 0 AND rating < 10), NOT NULL
+                    rating REAL CHECK(rating > 0 AND rating < 5) NOT NULL
                 )",
                 [],
             )
