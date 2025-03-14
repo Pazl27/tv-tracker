@@ -31,15 +31,35 @@ impl Sqlight {
             let conn = Connection::open(db_path).expect("Failed to open the database");
 
             conn.execute(
-                "CREATE TABLE IF NOT EXISTS shows (
+                "CREATE TABLE IF NOT EXISTS movies_to_watch (
                     id INTEGER PRIMARY KEY,
                     name TEXT NOT NULL,
-                    season INTEGER NOT NULL,
-                    episode INTEGER NOT NULL
+                    poster_url TEXT NOT NULL
                 )",
                 [],
             )
-            .expect("Failed to create table");
+            .expect("Failed to create movies_to_watch table");
+
+            conn.execute(
+                "CREATE TABLE IF NOT EXISTS tv_shows_to_watch (
+                    id INTEGER PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    poster_url TEXT NOT NULL
+                )",
+                [],
+            )
+            .expect("Failed to create tv_shows_to_watch table");
+
+            conn.execute(
+                "CREATE TABLE IF NOT EXISTS watched_movies (
+                    id INTEGER PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    poster_url TEXT NOT NULL,
+                    rating REAL CHECK (rating > 0 AND rating < 10), NOT NULL
+                )",
+                [],
+            )
+            .expect("Failed to create watched_movies table");
 
             Arc::new(Mutex::new(Sqlight { conn }))
         });
