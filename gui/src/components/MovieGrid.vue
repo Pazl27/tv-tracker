@@ -15,11 +15,14 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { invoke } from "@tauri-apps/api/core";
 import { fetchMovies } from '../services/tmdbService';
+import { defineProps } from 'vue';
 
-const movies = ref<any[]>([]);
+const props = defineProps<{ searchedMovies: any[] }>();
+
+const movies = ref<any[]>(props.searchedMovies || []);
 const loading = ref(true);
 
 // Fetch trending movies
@@ -33,8 +36,20 @@ const loadMovies = async () => {
   }
 };
 
-// Fetch initial movies when component mounts
-onMounted(loadMovies);
+onMounted(() => {
+  if (movies.value.length === 0) {
+    loadMovies();
+  } else {
+    loading.value = false;
+  }
+});
+
+watch(() => props.searchedMovies, (newMovies) => {
+  if (newMovies && newMovies.length > 0) {
+    movies.value = newMovies;
+    loading.value = false;
+  }
+});
 </script>
 
 <style scoped>

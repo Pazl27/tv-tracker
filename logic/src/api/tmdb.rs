@@ -50,12 +50,12 @@ impl Tmdb {
         Ok(json["success"].as_bool().unwrap_or(false))
     }
 
-    pub async fn find_movies(&self, query: &str) {
+    pub async fn find_movies(&self, query: &str) -> Option<Vec<Movie>> {
         let client = Client::new();
         let url = format!(
-            "https://api.themoviedb.org/3/search/movie?query={}&include_adult=false&language=en-US&page=1",
-            query
-        );
+        "https://api.themoviedb.org/3/search/movie?query={}&include_adult=false&language=en-US&page=1",
+        query
+    );
         let response = client
             .get(&url)
             .header("Authorization", format!("Bearer {}", self.api_key))
@@ -67,16 +67,28 @@ impl Tmdb {
         let response_text = response.text().await.unwrap();
         let json: Value = serde_json::from_str(&response_text).unwrap();
 
+        let mut movies = Vec::new();
+
         if let Some(results) = json["results"].as_array() {
             for movie in results {
                 let title = movie["original_title"].as_str().unwrap_or("N/A");
                 let id = movie["id"].as_i64().unwrap_or(0);
-                println!("Title: {}, ID: {}", title, id);
+                let poster_path = movie["poster_path"].as_str().unwrap_or("");
+                movies.push(Movie {
+                    id: id as u32,
+                    title: title.to_string(),
+                    poster_path: poster_path.to_string(),
+                });
             }
+        }
+        if movies.is_empty() {
+            return None;
+        } else {
+            return Some(movies);
         }
     }
 
-    pub async fn find_tv(&self, query: &str) {
+    pub async fn find_tv(&self, query: &str) -> Option<Vec<Tv>> {
         let client = Client::new();
         let url = format!(
             "https://api.themoviedb.org/3/search/tv?query={}&include_adult=false&language=en-US&page=1",
@@ -94,12 +106,24 @@ impl Tmdb {
         let response_text = response.text().await.unwrap();
         let json: Value = serde_json::from_str(&response_text).unwrap();
 
+        let mut shows = Vec::new();
+
         if let Some(results) = json["results"].as_array() {
-            for movie in results {
-                let title = movie["original_title"].as_str().unwrap_or("N/A");
-                let id = movie["id"].as_i64().unwrap_or(0);
-                println!("Title: {}, ID: {}", title, id);
+            for show in results {
+                let title = show["name"].as_str().unwrap_or("N/A");
+                let id = show["id"].as_i64().unwrap_or(0);
+                let poster_path = show["poster_path"].as_str().unwrap_or("");
+                shows.push(Tv {
+                    id: id as u32,
+                    name: title.to_string(),
+                    poster_path: poster_path.to_string(),
+                });
             }
+        }
+        if shows.is_empty() {
+            return None;
+        } else {
+            return Some(shows);
         }
     }
 
