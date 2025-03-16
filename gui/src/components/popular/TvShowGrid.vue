@@ -1,16 +1,15 @@
 <template>
   <div class="movie-grid">
-    <!-- Skeleton loaders with the same structure as movie cards -->
+    <!-- Skeleton loaders with the same structure as TV show cards -->
     <div v-if="loading" class="skeleton-loader" v-for="n in 20" :key="n">
       <div class="skeleton-poster"></div>
       <div class="skeleton-title"></div>
     </div>
-    
-    <!-- Movie Cards -->
-    <div v-else class="movie-card" v-for="movie in movies" :key="movie.id">
-      <img :src="movie.poster_url" :alt="movie.title" class="movie-poster" />
-      <h3 class="movie-title">{{ movie.title }}</h3>
-      <button class="add-button" @click="addToWatchlist(movie)"><i class="plus-icon" >+</i></button>
+
+    <!-- TV Show Cards -->
+    <div v-else class="movie-card" v-for="show in tvShows" :key="show.id">
+      <img :src="show.poster_url" :alt="show.name" class="movie-poster" />
+      <h3 class="movie-title">{{ show.name }}</h3>
     </div>
   </div>
 </template>
@@ -18,45 +17,37 @@
 <script lang="ts" setup>
 import { ref, onMounted, watch } from 'vue';
 import { invoke } from "@tauri-apps/api/core";
-import { fetchMovies } from '../services/tmdbService';
+import { fetchTvShows } from '../../services/tmdbService';
 import { defineProps } from 'vue';
 
-const props = defineProps<{ searchedMovies: any[] }>();
+const props = defineProps<{ searchedTvShows: any[] }>();
 
-const movies = ref<any[]>(props.searchedMovies || []);
+const tvShows = ref<any[]>(props.searchedTvShows || []);
 const loading = ref(true);
 
-// Fetch trending movies
-const loadMovies = async () => {
+// Fetch trending TV shows
+const loadTvShows = async () => {
   try {
-    movies.value = await fetchMovies(invoke);
+    tvShows.value = await fetchTvShows(invoke);
   } catch (error) {
-    console.error('Failed to load movies:', error);
+    console.error('Failed to load TV shows:', error);
   } finally {
     loading.value = false;
   }
 };
 
-const addToWatchlist = async (movie: any) => {
-  try {
-    await invoke('add_movie_to_watchlist', { movie })
-    console.log('Added to watchlist:', movie)
-  } catch (error) {
-    console.error('Failed to add movie to watchlist:', error)
-  }
-}
-
+// Fetch initial TV shows when component mounts
 onMounted(() => {
-  if (movies.value.length === 0) {
-    loadMovies();
+  if (tvShows.value.length === 0) {
+    loadTvShows();
   } else {
     loading.value = false;
   }
 });
 
-watch(() => props.searchedMovies, (newMovies) => {
-  if (newMovies && newMovies.length > 0) {
-    movies.value = newMovies;
+watch(() => props.searchedTvShows, (newTvShows) => {
+  if (newTvShows && newTvShows.length > 0) {
+    tvShows.value = newTvShows;
     loading.value = false;
   }
 });
@@ -73,11 +64,10 @@ watch(() => props.searchedMovies, (newMovies) => {
   flex: 1 1 calc(25% - 16px);
   box-sizing: border-box;
   border: 2px solid var(--color-border);
+  border-radius: 3%;
   background: var(--color-background-dark);
-  border-radius: 8px;
   overflow: hidden;
   text-align: center;
-  position: relative; /* Ensure the button is positioned correctly */
 }
 
 .movie-card:hover {
@@ -106,8 +96,8 @@ watch(() => props.searchedMovies, (newMovies) => {
 
 .skeleton-poster {
   width: 100%;
-  height: 300px; 
-  background: var(--color-background-dark);
+  height: 300px;
+  background: var (--color-background-dark);
 }
 
 .skeleton-title {
@@ -127,24 +117,5 @@ watch(() => props.searchedMovies, (newMovies) => {
   100% {
     background-color: var(--color-background-light);
   }
-}
-
-.add-button {
-  display: none;
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  background-color: var(--color-border-hover);
-  border: none;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  color: white;
-  font-size: 24px;
-  cursor: pointer;
-}
-
-.movie-card:hover .add-button {
-  display: block;
 }
 </style>

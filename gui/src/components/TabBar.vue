@@ -1,5 +1,10 @@
 <template>
   <div class="tabbar-container">
+    <!-- Home Link -->
+    <div class="home-link" @click="goHome">
+      Home
+    </div>
+
     <!-- Search Bar -->
     <div class="search-bar">
       <input
@@ -10,20 +15,20 @@
       />
     </div>
 
-    <!-- Tabs -->
-    <div class="tabbar">
-      <!-- Movies tab -->
+    <!-- Sub Tabs -->
+    <div class="sub-tabbar">
+      <!-- Movies sub-tab -->
       <button
-        :class="{ active: activeTab === 'movies' }"
-        @click="switchTab('movies')"
+        :class="{ active: activeSubTab === 'movies' }"
+        @click="switchSubTab('movies')"
       >
         Movies
       </button>
-      
-      <!-- TV Shows tab -->
+
+      <!-- TV Shows sub-tab -->
       <button
-        :class="{ active: activeTab === 'tvShows' }"
-        @click="switchTab('tvShows')"
+        :class="{ active: activeSubTab === 'tvShows' }"
+        @click="switchSubTab('tvShows')"
       >
         TV Shows
       </button>
@@ -33,24 +38,30 @@
 
 <script lang="ts" setup>
 import { defineProps, defineEmits, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 const emit = defineEmits<{
-  (e: 'tab-switched', tab: string): void;
+  (e: 'sub-tab-switched', subTab: string): void;
   (e: 'search-input', query: string): void;
 }>();
 
 const props = defineProps({
-  activeTab: String,
+  activeSubTab: String,
 });
 
-const searchQuery = ref(''); 
+const searchQuery = ref('');
+const router = useRouter();
 
-const switchTab = (tab: string) => {
-  emit('tab-switched', tab);
+const switchSubTab = (subTab: string) => {
+  emit('sub-tab-switched', subTab);
 };
 
 const onSearchInput = () => {
   emit('search-input', searchQuery.value);
+};
+
+const goHome = () => {
+  router.push('/');
 };
 </script>
 
@@ -60,6 +71,18 @@ const onSearchInput = () => {
   flex-direction: column;
   align-items: center;
   margin-bottom: 16px;
+}
+
+.home-link {
+  margin-bottom: 16px;
+  cursor: pointer;
+  font-size: 24px;
+  font-weight: bold;
+  color: #007bff;
+}
+
+.home-link:hover {
+  text-decoration: underline;
 }
 
 .search-bar {
@@ -84,13 +107,13 @@ const onSearchInput = () => {
   box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
-.tabbar {
+.sub-tabbar {
   display: flex;
   justify-content: center;
   margin-bottom: 16px;
 }
 
-.tabbar button {
+.sub-tabbar button {
   padding: 8px 16px;
   margin: 0 8px;
   cursor: pointer;
@@ -101,7 +124,7 @@ const onSearchInput = () => {
 }
 
 /* Highlight active tab */
-.tabbar button.active {
+.sub-tabbar button.active {
   background-color: #007bff;
   color: white;
 }
