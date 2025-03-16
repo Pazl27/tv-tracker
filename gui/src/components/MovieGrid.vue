@@ -10,6 +10,7 @@
     <div v-else class="movie-card" v-for="movie in movies" :key="movie.id">
       <img :src="movie.poster_url" :alt="movie.title" class="movie-poster" />
       <h3 class="movie-title">{{ movie.title }}</h3>
+      <button class="add-button" @click="addToWatchlist(movie)"><i class="plus-icon" >+</i></button>
     </div>
   </div>
 </template>
@@ -35,6 +36,15 @@ const loadMovies = async () => {
     loading.value = false;
   }
 };
+
+const addToWatchlist = async (movie: any) => {
+  try {
+    await invoke('add_movie_to_watchlist', { movie })
+    console.log('Added to watchlist:', movie)
+  } catch (error) {
+    console.error('Failed to add movie to watchlist:', error)
+  }
+}
 
 onMounted(() => {
   if (movies.value.length === 0) {
@@ -67,6 +77,7 @@ watch(() => props.searchedMovies, (newMovies) => {
   border-radius: 8px;
   overflow: hidden;
   text-align: center;
+  position: relative; /* Ensure the button is positioned correctly */
 }
 
 .movie-card:hover {
@@ -116,5 +127,24 @@ watch(() => props.searchedMovies, (newMovies) => {
   100% {
     background-color: var(--color-background-light);
   }
+}
+
+.add-button {
+  display: none;
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background-color: var(--color-border-hover);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.movie-card:hover .add-button {
+  display: block;
 }
 </style>
