@@ -1,5 +1,5 @@
+use anyhow::{Context, Result};
 use dirs::home_dir;
-use anyhow::{Result, Context};
 use std::path::PathBuf;
 
 pub fn get_config_path() -> PathBuf {

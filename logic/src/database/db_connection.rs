@@ -78,15 +78,15 @@ impl Sqlight {
     }
 
     pub fn delete_movie_to_watch(&self, id: i32) -> Result<()> {
-        self.conn.execute(
-            "DELETE FROM movies_to_watch WHERE id = ?1",
-            &[&id],
-        )?;
+        self.conn
+            .execute("DELETE FROM movies_to_watch WHERE id = ?1", &[&id])?;
         Ok(())
     }
 
     pub fn get_all_movies_to_watch(&self) -> Result<Vec<MovieToWatch>> {
-        let mut stmt = self.conn.prepare("SELECT id, name, poster_url FROM movies_to_watch")?;
+        let mut stmt = self
+            .conn
+            .prepare("SELECT id, name, poster_url FROM movies_to_watch")?;
         let movie_iter = stmt.query_map([], |row| {
             Ok(MovieToWatch {
                 id: row.get(0)?,
@@ -111,15 +111,15 @@ impl Sqlight {
     }
 
     pub fn delete_watched_movie(&self, id: i32) -> Result<()> {
-        self.conn.execute(
-            "DELETE FROM watched_movies WHERE id = ?1",
-            &[&id],
-        )?;
+        self.conn
+            .execute("DELETE FROM watched_movies WHERE id = ?1", &[&id])?;
         Ok(())
     }
 
     pub fn get_watched_movies(&self) -> Result<Vec<WatchedMovie>> {
-        let mut stmt = self.conn.prepare("SELECT id, name, poster_url, rating FROM watched_movies")?;
+        let mut stmt = self
+            .conn
+            .prepare("SELECT id, name, poster_url, rating FROM watched_movies")?;
         let movie_iter = stmt.query_map([], |row| {
             Ok(WatchedMovie {
                 id: row.get(0)?,
@@ -145,15 +145,15 @@ impl Sqlight {
     }
 
     pub fn delete_tv_show_to_watch(&self, id: i32) -> Result<()> {
-        self.conn.execute(
-            "DELETE FROM tv_shows_to_watch WHERE id = ?1",
-            &[&id],
-        )?;
+        self.conn
+            .execute("DELETE FROM tv_shows_to_watch WHERE id = ?1", &[&id])?;
         Ok(())
     }
 
     pub fn get_all_tv_shows_to_watch(&self) -> Result<Vec<TvShowToWatch>> {
-        let mut stmt = self.conn.prepare("SELECT id, name, poster_url FROM tv_shows_to_watch")?;
+        let mut stmt = self
+            .conn
+            .prepare("SELECT id, name, poster_url FROM tv_shows_to_watch")?;
         let tv_show_iter = stmt.query_map([], |row| {
             Ok(TvShowToWatch {
                 id: row.get(0)?,
@@ -175,4 +175,3 @@ fn create_directory(dir_path: &std::path::PathBuf) {
         fs::create_dir_all(&dir_path).expect("Failed to create directory");
     }
 }
-

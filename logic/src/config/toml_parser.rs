@@ -1,12 +1,11 @@
-use std::fs;
-use toml;
-use serde::{Deserialize, Serialize};
+use anyhow::{Context, Result};
 use dirs::home_dir;
+use serde::{Deserialize, Serialize};
+use std::fs;
 use std::path::PathBuf;
-use anyhow::{Result, Context};
+use toml;
 
-#[derive(Serialize, Deserialize)]
-#[derive(Clone)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct TmdbTable {
     pub api_key: Option<String>,
 }
