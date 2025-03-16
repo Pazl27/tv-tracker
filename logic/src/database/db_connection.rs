@@ -1,5 +1,5 @@
 use dirs::home_dir;
-use rusqlite::{Connection, Result};
+use rusqlite::{params, Connection, Result};
 use std::fs;
 use std::sync::{Arc, Mutex, OnceLock};
 
@@ -35,8 +35,8 @@ impl Sqlight {
             conn.execute(
                 "CREATE TABLE IF NOT EXISTS movies_to_watch (
                     id INTEGER PRIMARY KEY,
-                    name TEXT NOT NULL,
-                    poster_url TEXT NOT NULL
+                    title TEXT NOT NULL,
+                    poster_path TEXT NOT NULL
                 )",
                 [],
             )
@@ -46,7 +46,7 @@ impl Sqlight {
                 "CREATE TABLE IF NOT EXISTS tv_shows_to_watch (
                     id INTEGER PRIMARY KEY,
                     name TEXT NOT NULL,
-                    poster_url TEXT NOT NULL
+                    poster_path TEXT NOT NULL
                 )",
                 [],
             )
@@ -55,8 +55,8 @@ impl Sqlight {
             conn.execute(
                 "CREATE TABLE IF NOT EXISTS watched_movies (
                     id INTEGER PRIMARY KEY,
-                    name TEXT NOT NULL,
-                    poster_url TEXT NOT NULL,
+                    title TEXT NOT NULL,
+                    poster_path TEXT NOT NULL,
                     rating REAL CHECK(rating > 0 AND rating < 5) NOT NULL
                 )",
                 [],
@@ -71,8 +71,8 @@ impl Sqlight {
 
     pub fn insert_movie_to_watch(&self, movie: &MovieToWatch) -> Result<()> {
         self.conn.execute(
-            "INSERT INTO movies_to_watch (name, poster_url) VALUES (?1, ?2)",
-            &[&movie.name, &movie.poster_url],
+            "INSERT INTO movies_to_watch (id, title, poster_path) VALUES (?1, ?2, ?3)",
+            params![movie.id, movie.title, movie.poster_path],
         )?;
         Ok(())
     }
@@ -86,12 +86,12 @@ impl Sqlight {
     pub fn get_all_movies_to_watch(&self) -> Result<Vec<MovieToWatch>> {
         let mut stmt = self
             .conn
-            .prepare("SELECT id, name, poster_url FROM movies_to_watch")?;
+            .prepare("SELECT id, title, poster_path FROM movies_to_watch")?;
         let movie_iter = stmt.query_map([], |row| {
             Ok(MovieToWatch {
                 id: row.get(0)?,
-                name: row.get(1)?,
-                poster_url: row.get(2)?,
+                title: row.get(1)?,
+                poster_path: row.get(2)?,
             })
         })?;
 
@@ -104,8 +104,8 @@ impl Sqlight {
 
     pub fn insert_watched_movie(&self, movie: &WatchedMovie) -> Result<()> {
         self.conn.execute(
-            "INSERT INTO watched_movies (name, poster_url, rating) VALUES (?1, ?2, ?3)",
-            &[&movie.name, &movie.poster_url, &movie.rating.to_string()],
+            "INSERT INTO watched_movies (id, title, poster_path, rating) VALUES (?1, ?2, ?3, ?4)",
+            params![movie.id, movie.title, movie.poster_path, movie.rating.to_string()],
         )?;
         Ok(())
     }
@@ -119,12 +119,12 @@ impl Sqlight {
     pub fn get_watched_movies(&self) -> Result<Vec<WatchedMovie>> {
         let mut stmt = self
             .conn
-            .prepare("SELECT id, name, poster_url, rating FROM watched_movies")?;
+            .prepare("SELECT id, title, poster_path, rating FROM watched_movies")?;
         let movie_iter = stmt.query_map([], |row| {
             Ok(WatchedMovie {
                 id: row.get(0)?,
-                name: row.get(1)?,
-                poster_url: row.get(2)?,
+                title: row.get(1)?,
+                poster_path: row.get(2)?,
                 rating: row.get(3)?,
             })
         })?;
@@ -138,8 +138,8 @@ impl Sqlight {
 
     pub fn insert_tv_show_to_watch(&self, tv_show: &TvShowToWatch) -> Result<()> {
         self.conn.execute(
-            "INSERT INTO tv_shows_to_watch (name, poster_url) VALUES (?1, ?2)",
-            &[&tv_show.name, &tv_show.poster_url],
+            "INSERT INTO tv_shows_to_watch (name, poster_path) VALUES (?1, ?2)",
+            &[&tv_show.name, &tv_show.poster_path],
         )?;
         Ok(())
     }
@@ -153,12 +153,12 @@ impl Sqlight {
     pub fn get_all_tv_shows_to_watch(&self) -> Result<Vec<TvShowToWatch>> {
         let mut stmt = self
             .conn
-            .prepare("SELECT id, name, poster_url FROM tv_shows_to_watch")?;
+            .prepare("SELECT id, name, poster_path FROM tv_shows_to_watch")?;
         let tv_show_iter = stmt.query_map([], |row| {
             Ok(TvShowToWatch {
                 id: row.get(0)?,
                 name: row.get(1)?,
-                poster_url: row.get(2)?,
+                poster_path: row.get(2)?,
             })
         })?;
 

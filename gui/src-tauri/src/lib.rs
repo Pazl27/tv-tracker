@@ -1,4 +1,4 @@
-use logic::api;
+use logic::{api, database};
 
 #[tauri::command]
 async fn get_trending_movies() -> Result<Vec<api::Movie>, String> {
@@ -48,6 +48,14 @@ async fn search_tv(query: String) -> Result<Vec<api::Tv>, String> {
     }
 }
 
+#[tauri::command]
+async fn add_movie_to_watchlist(movie: database::entities::MovieToWatch) -> Result<(), String> {
+    let conn = database::Sqlight::get_connection().map_err(|e| e.to_string())?;
+    let db = conn.lock().expect("Failed to lock the mutex");
+    let _ = db.insert_movie_to_watch(&movie).map_err(|e| e.to_string());
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -59,6 +67,9 @@ pub fn run() {
             add_api_key,
             search_movies,
             search_tv,
+
+            // Database
+            add_movie_to_watchlist,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
