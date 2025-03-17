@@ -4,10 +4,16 @@
     @sub-tab-switched="handleSubTabSwitched"
     @search-input="handleSearchInput"
   />
-  <WatchlistMovieGrid
-    :watchlistMovies="watchlistMovies"
-    :searchQuery="searchQuery"
-  />
+  <div v-if="activeSubTab === 'movies'">
+    <WatchlistMovieGrid
+      :watchlistMovies="watchlistMovies"
+    />
+  </div>
+  <div v-else>
+    <WatchlistTvShowGrid
+      :watchlistTvShows="watchlistTvShows"
+    />
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -15,11 +21,13 @@ import { ref } from 'vue';
 import { invoke } from "@tauri-apps/api/core";
 import TabBar from '../components/TabBar.vue';
 import WatchlistMovieGrid from '../components/watchlist/WatchlistMovieGrid.vue';
+import WatchlistTvShowGrid from '../components/watchlist/WatchlistTvShowGrid.vue';
 import { searchMovies, searchShows } from '../services/tmdbService';
 
 const activeSubTab = ref('movies');
 const searchQuery = ref('');
 const watchlistMovies = ref<any[]>([]);
+const watchlistTvShows = ref<any[]>([]);
 
 const handleSubTabSwitched = (subTab: string) => {
   activeSubTab.value = subTab;
@@ -45,11 +53,10 @@ const searchMoviesHandler = async (query: string) => {
 
 const searchTvShowsHandler = async (query: string) => {
   try {
-    tvShows.value = await searchShows(invoke, query);
-    console.log(tvShows.value);
+    watchlistTvShows.value = await searchShows(invoke, query);
+    console.log(watchlistTvShows.value);
   } catch (error) {
     console.error('Failed to search TV shows:', error);
   }
 };
-
 </script>
