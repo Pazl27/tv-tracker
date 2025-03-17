@@ -10,7 +10,7 @@
     <div v-else class="movie-card" v-for="movie in movies" :key="movie.id">
       <img :src="movie.poster_url" :alt="movie.title" class="movie-poster" />
       <h3 class="movie-title">{{ movie.title }}</h3>
-      <button class="add-button" @click="addToWatchlist(movie)"><i class="plus-icon" >+</i></button>
+      <button class="add-button" @click="addToWatchlist(movie)"><i class="plus-icon">+</i></button>
     </div>
   </div>
 </template>
@@ -39,12 +39,12 @@ const loadMovies = async () => {
 
 const addToWatchlist = async (movie: any) => {
   try {
-    await invoke('add_movie_to_watchlist', { movie })
-    console.log('Added to watchlist:', movie)
+    await invoke('add_movie_to_watchlist', { movie });
+    console.log('Added to watchlist:', movie);
   } catch (error) {
-    console.error('Failed to add movie to watchlist:', error)
+    console.error('Failed to add movie to watchlist:', error);
   }
-}
+};
 
 onMounted(() => {
   if (movies.value.length === 0) {
@@ -64,13 +64,12 @@ watch(() => props.searchedMovies, (newMovies) => {
 
 <style scoped>
 .movie-grid {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
   gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 }
 
 .movie-card, .skeleton-loader {
-  flex: 1 1 calc(25% - 16px);
   box-sizing: border-box;
   border: 2px solid var(--color-border);
   background: var(--color-background-dark);
@@ -146,5 +145,36 @@ watch(() => props.searchedMovies, (newMovies) => {
 
 .movie-card:hover .add-button {
   display: block;
+}
+
+/* Responsive Styles */
+@media (min-width: 1200px) {
+  .movie-grid {
+    grid-template-columns: repeat(8, 1fr); /* 8 cards per row */
+  }
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+  .movie-grid {
+    grid-template-columns: repeat(6, 1fr); /* 6 cards per row */
+  }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  .movie-grid {
+    grid-template-columns: repeat(4, 1fr); /* 4 cards per row */
+  }
+}
+
+@media (max-width: 767px) {
+  .movie-grid {
+    grid-template-columns: repeat(2, 1fr); /* 2 cards per row */
+  }
+}
+
+@media (max-width: 480px) {
+  .movie-grid {
+    grid-template-columns: repeat(1, 1fr); /* 1 card per row */
+  }
 }
 </style>
