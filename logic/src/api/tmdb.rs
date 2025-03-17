@@ -2,6 +2,7 @@ use anyhow::{Context, Result};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::collections::HashSet;
 
 use crate::config::TmdbConfig;
 
@@ -199,31 +200,46 @@ impl Tmdb {
 
     pub async fn trending_movies(&self) -> Option<Vec<Movie>> {
         let client = Client::new();
-        let url = format!("https://api.themoviedb.org/3/trending/movie/day?language=en-US");
+        let mut all_movies = Vec::new();
+        let mut seen_ids = HashSet::new();
 
-        let response = client
-            .get(&url)
-            .header("Authorization", format!("Bearer {}", self.api_key))
-            .header("accept", "application/json")
-            .send()
-            .await
-            .unwrap();
+        for page in 1..=3 {
+            let url = format!("https://api.themoviedb.org/3/trending/movie/day?language=en-US&page={}", page);
 
-        let response_text = response.text().await.unwrap();
-        let json: Value = serde_json::from_str(&response_text).unwrap();
+            let response = client
+                .get(&url)
+                .header("Authorization", format!("Bearer {}", self.api_key))
+                .header("accept", "application/json")
+                .send()
+                .await
+                .unwrap();
 
-        if let Some(results) = json["results"].as_array() {
-            let movies: Vec<Movie> = results
-                .iter()
-                .map(|movie| Movie {
-                    id: movie["id"].as_u64().unwrap() as u32,
-                    title: movie["title"].as_str().unwrap().to_string(),
-                    poster_path: movie["poster_path"].as_str().unwrap().to_string(),
-                })
-                .collect();
-            return Some(movies);
+            let response_text = response.text().await.unwrap();
+            let json: Value = serde_json::from_str(&response_text).unwrap();
+
+            if let Some(results) = json["results"].as_array() {
+                let movies: Vec<Movie> = results
+                    .iter()
+                    .map(|movie| Movie {
+                        id: movie["id"].as_u64().unwrap() as u32,
+                        title: movie["title"].as_str().unwrap().to_string(),
+                        poster_path: movie["poster_path"].as_str().unwrap().to_string(),
+                    })
+                    .collect();
+
+                for movie in movies {
+                    if seen_ids.insert(movie.id) {
+                        all_movies.push(movie);
+                    }
+                }
+            }
         }
-        None
+
+        if all_movies.is_empty() {
+            None
+        } else {
+            Some(all_movies)
+        }
     }
 
     pub async fn trending_tv(&self) -> Option<Vec<Tv>> {
@@ -253,5 +269,18 @@ impl Tmdb {
             return Some(shows);
         }
         None
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[tokio::test]
+    async fn test() {
+        let tmdb = Tmdb::new(TmdbConfig::default());
+        let movies = tmdb.trending_movies().await.unwrap();
+        println!("{:?}", movies);
+        println!("size {}", movies.len())
     }
 }

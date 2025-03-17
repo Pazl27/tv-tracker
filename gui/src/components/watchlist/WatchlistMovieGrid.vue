@@ -1,7 +1,7 @@
 <template>
   <div class="movie-grid">
     <!-- Skeleton loaders with the same structure as movie cards -->
-    <div v-if="loading" class="skeleton-loader" v-for="n in 20" :key="n">
+    <div v-if="loading" class="skeleton-loader" v-for="n in 60" :key="n">
       <div class="skeleton-poster"></div>
       <div class="skeleton-title"></div>
     </div>
@@ -28,9 +28,9 @@ const loading = ref(true);
 
 const removeFromWatchlist = async (movie: any) => {
   try {
+    //TODO: remove stuff
     await invoke('remove_movie_from_watchlist', { movie });
     console.log('Removed from watchlist:', movie);
-    // Optionally, you can emit an event to notify the parent component to update the watchlist
   } catch (error) {
     console.error('Failed to remove movie from watchlist:', error);
   }
