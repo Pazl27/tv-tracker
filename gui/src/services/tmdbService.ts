@@ -66,6 +66,7 @@ export const fetchTvShows = async (invokeFunction: any) => {
       ...show,
       poster_url: `https://image.tmdb.org/t/p/original${show.poster_path}`,
     }));
+    console.log(tvShows.length)
 
     // Cache the TV shows
     setToCache(TV_SHOWS_CACHE_KEY, tvShows);

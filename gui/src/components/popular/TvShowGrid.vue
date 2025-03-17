@@ -1,7 +1,7 @@
 <template>
   <div class="movie-grid">
     <!-- Skeleton loaders with the same structure as TV show cards -->
-    <div v-if="loading" class="skeleton-loader" v-for="n in 20" :key="n">
+    <div v-if="loading" class="skeleton-loader" v-for="n in 60" :key="n">
       <div class="skeleton-poster"></div>
       <div class="skeleton-title"></div>
     </div>
@@ -29,6 +29,7 @@ const loading = ref(true);
 const loadTvShows = async () => {
   try {
     tvShows.value = await fetchTvShows(invoke);
+    console.log(tvShows.value.length)
   } catch (error) {
     console.error('Failed to load TV shows:', error);
   } finally {
