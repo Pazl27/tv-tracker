@@ -19,6 +19,7 @@
 import { ref, onMounted, watch } from 'vue';
 import { invoke } from "@tauri-apps/api/core";
 import { defineProps } from 'vue';
+import { fetchShowWatchlist } from '../../services/tmdbService';
 
 const props = defineProps<{ watchlistTvShows: any[] }>();
 
@@ -27,16 +28,26 @@ const loading = ref(true);
 
 const removeFromWatchlist = async (show: any) => {
   try {
-    await invoke('remove_tv_show_from_watchlist', { show });
+    await invoke('remove_show_from_watchlist', { show });
     console.log('Removed from watchlist:', show);
   } catch (error) {
     console.error('Failed to remove TV show from watchlist:', error);
   }
 };
 
+const loadTvShows = async () => {
+  try {
+    watchlistTvShows.value = await fetchShowWatchlist(invoke);
+  } catch (error) {
+    console.error('Failed to load shows:', error);
+  } finally {
+    loading.value = false;
+  }
+};
+
 onMounted(() => {
   if (watchlistTvShows.value.length === 0) {
-    loading.value = false;
+    loadTvShows();
   } else {
     loading.value = false;
   }

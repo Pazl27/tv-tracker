@@ -28,7 +28,6 @@ const loading = ref(true);
 
 const removeFromWatchlist = async (movie: any) => {
   try {
-    //TODO: remove stuff
     await invoke('remove_movie_from_watchlist', { movie });
     console.log('Removed from watchlist:', movie);
   } catch (error) {

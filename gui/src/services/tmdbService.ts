@@ -120,5 +120,22 @@ export const fetchMovieWatchlist = async (invokeFunction: any) => {
     console.error('Failed to fetch trending movies:', error);
     return [];
   }
+}
 
+export const fetchShowWatchlist = async (invokeFunction: any) => {
+  
+  try {
+    const result: any[] = await invokeFunction('get_watchlist_shows');
+    console.log("hllelelelelel")
+    console.log(result)
+    const shows = result.map((show: any) => ({
+      ...show,
+      poster_url: `https://image.tmdb.org/t/p/original${show.poster_path}`,
+    }));
+
+    return shows;
+  } catch (error) {
+    console.error('Failed to fetch trending movies:', error);
+    return [];
+  }
 }

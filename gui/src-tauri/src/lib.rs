@@ -63,6 +63,35 @@ async fn get_watchlist_movies() -> Result<Vec<database::entities::MovieToWatch>,
     db.get_all_movies_to_watch().map_err(|e| e.to_string())
 }
 
+#[tauri::command]
+async fn remove_movie_from_watchlist(movie: database::entities::MovieToWatch) -> Result<(), String> {
+    let conn = database::Sqlight::get_connection().map_err(|e| e.to_string())?;
+    let db = conn.lock().expect("Failed to lock the mutex");
+    db.delete_movie_to_watch(movie.id).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn add_show_to_watchlist(show: database::entities::TvShowToWatch) -> Result<(), String> {
+    let conn = database::Sqlight::get_connection().map_err(|e| e.to_string())?;
+    let db = conn.lock().expect("Failed to lock the mutex");
+    let _ = db.insert_tv_show_to_watch(&show).map_err(|e| e.to_string());
+    Ok(())
+}
+
+#[tauri::command]
+async fn get_watchlist_shows() -> Result<Vec<database::entities::TvShowToWatch>, String> {
+    let conn = database::Sqlight::get_connection().map_err(|e| e.to_string())?;
+    let db = conn.lock().expect("Failed to lock the mutex");
+    db.get_all_tv_shows_to_watch().map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn remove_show_from_watchlist(show: database::entities::TvShowToWatch) -> Result<(), String> {
+    let conn = database::Sqlight::get_connection().map_err(|e| e.to_string())?;
+    let db = conn.lock().expect("Failed to lock the mutex");
+    db.delete_tv_show_to_watch(show.id).map_err(|e| e.to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -77,7 +106,11 @@ pub fn run() {
 
             // Database
             add_movie_to_watchlist,
-            get_watchlist_movies
+            get_watchlist_movies,
+            remove_movie_from_watchlist,
+            add_show_to_watchlist,
+            get_watchlist_shows,
+            remove_show_from_watchlist,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

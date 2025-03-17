@@ -10,6 +10,7 @@
     <div v-else class="movie-card" v-for="show in tvShows" :key="show.id">
       <img :src="show.poster_url" :alt="show.name" class="movie-poster" />
       <h3 class="movie-title">{{ show.name }}</h3>
+      <button class="add-button" @click="addToWatchlist(show)"><i class="plus-icon">+</i></button>
     </div>
   </div>
 </template>
@@ -34,6 +35,15 @@ const loadTvShows = async () => {
     console.error('Failed to load TV shows:', error);
   } finally {
     loading.value = false;
+  }
+};
+
+const addToWatchlist = async (show: any) => {
+  try {
+    await invoke('add_show_to_watchlist', { show });
+    console.log('Added to watchlist:', show);
+  } catch (error) {
+    console.error('Failed to add show to watchlist:', error);
   }
 };
 
@@ -68,6 +78,7 @@ watch(() => props.searchedTvShows, (newTvShows) => {
   background: var(--color-background-dark);
   overflow: hidden;
   text-align: center;
+  position: relative; 
 }
 
 .movie-card:hover {
@@ -105,6 +116,25 @@ watch(() => props.searchedTvShows, (newTvShows) => {
   height: 20px;
   margin: 10px auto;
   background: var(--color-background-dark);
+}
+
+.add-button {
+  display: none;
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background-color: var(--color-border-hover);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.movie-card:hover .add-button {
+  display: block;
 }
 
 @keyframes pulse {
