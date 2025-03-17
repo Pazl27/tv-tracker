@@ -1,31 +1,55 @@
 <template>
-  <div>
-    <TabBar :activeTab="activeTab" :activeSubTab="activeSubTab" @tab-switched="switchTab" @sub-tab-switched="switchSubTab" @search-input="handleSearchInput" />
-    <WatchlistGrid v-if="activeSubTab === 'movies'" :watchlistItems="watchlistMovies" />
-    <WatchlistGrid v-if="activeSubTab === 'tvShows'" :watchlistItems="watchlistTvShows" />
-  </div>
+  <TabBar
+    :activeSubTab="activeSubTab"
+    @sub-tab-switched="handleSubTabSwitched"
+    @search-input="handleSearchInput"
+  />
+  <WatchlistMovieGrid
+    :watchlistMovies="watchlistMovies"
+    :searchQuery="searchQuery"
+  />
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { ref } from 'vue';
 import { invoke } from "@tauri-apps/api/core";
-import WatchlistGrid from '../components/watchlist/WatchlistGrid.vue';
 import TabBar from '../components/TabBar.vue';
+import WatchlistMovieGrid from '../components/watchlist/WatchlistMovieGrid.vue';
+import { searchMovies, searchShows } from '../services/tmdbService';
 
-const activeTab = ref('watchlist');
 const activeSubTab = ref('movies');
-const watchlistMovies = ref([]);
-const watchlistTvShows = ref([]);
+const searchQuery = ref('');
+const watchlistMovies = ref<any[]>([]);
 
-const switchTab = (tab: string) => {
-  activeTab.value = tab;
-};
-
-const switchSubTab = (subTab: string) => {
+const handleSubTabSwitched = (subTab: string) => {
   activeSubTab.value = subTab;
 };
 
 const handleSearchInput = (query: string) => {
-  // Implement search logic for watchlist
+  searchQuery.value = query;
+
+  if (activeSubTab.value === 'movies') {
+    searchMoviesHandler(query);
+  } else {
+    searchTvShowsHandler(query);
+  }
 };
+
+const searchMoviesHandler = async (query: string) => {
+  try {
+    watchlistMovies.value = await searchMovies(invoke, query);
+  } catch (error) {
+    console.error('Failed to search movies:', error);
+  }
+};
+
+const searchTvShowsHandler = async (query: string) => {
+  try {
+    tvShows.value = await searchShows(invoke, query);
+    console.log(tvShows.value);
+  } catch (error) {
+    console.error('Failed to search TV shows:', error);
+  }
+};
+
 </script>

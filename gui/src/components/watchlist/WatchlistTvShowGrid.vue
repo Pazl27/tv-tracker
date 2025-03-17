@@ -1,16 +1,17 @@
+
 <template>
   <div class="movie-grid">
-    <!-- Skeleton loaders with the same structure as movie cards -->
+    <!-- Skeleton loaders with the same structure as TV show cards -->
     <div v-if="loading" class="skeleton-loader" v-for="n in 20" :key="n">
       <div class="skeleton-poster"></div>
       <div class="skeleton-title"></div>
     </div>
 
-    <!-- Movie Cards -->
-    <div v-else class="movie-card" v-for="movie in movies" :key="movie.id">
-      <img :src="movie.poster_url" :alt="movie.title" class="movie-poster" />
-      <h3 class="movie-title">{{ movie.title }}</h3>
-      <button class="add-button" @click="addToWatchlist(movie)"><i class="plus-icon" >+</i></button>
+    <!-- TV Show Cards -->
+    <div v-else class="movie-card" v-for="show in watchlistTvShows" :key="show.id">
+      <img :src="show.poster_url" :alt="show.name" class="movie-poster" />
+      <h3 class="movie-title">{{ show.name }}</h3>
+      <button class="remove-button" @click="removeFromWatchlist(show)"><i class="minus-icon">-</i></button>
     </div>
   </div>
 </template>
@@ -18,45 +19,34 @@
 <script lang="ts" setup>
 import { ref, onMounted, watch } from 'vue';
 import { invoke } from "@tauri-apps/api/core";
-import { fetchMovies } from '../../services/tmdbService';
 import { defineProps } from 'vue';
 
-const props = defineProps<{ searchedMovies: any[] }>();
+const props = defineProps<{ watchlistTvShows: any[] }>();
 
-const movies = ref<any[]>(props.searchedMovies || []);
+const watchlistTvShows = ref<any[]>(props.watchlistTvShows || []);
 const loading = ref(true);
 
-// Fetch trending movies
-const loadMovies = async () => {
+const removeFromWatchlist = async (show: any) => {
   try {
-    movies.value = await fetchMovies(invoke);
+    await invoke('remove_tv_show_from_watchlist', { show });
+    console.log('Removed from watchlist:', show);
+    // Optionally, you can emit an event to notify the parent component to update the watchlist
   } catch (error) {
-    console.error('Failed to load movies:', error);
-  } finally {
-    loading.value = false;
+    console.error('Failed to remove TV show from watchlist:', error);
   }
 };
 
-const addToWatchlist = async (movie: any) => {
-  try {
-    await invoke('add_movie_to_watchlist', { movie })
-    console.log('Added to watchlist:', movie)
-  } catch (error) {
-    console.error('Failed to add movie to watchlist:', error)
-  }
-}
-
 onMounted(() => {
-  if (movies.value.length === 0) {
-    loadMovies();
+  if (watchlistTvShows.value.length === 0) {
+    loading.value = false;
   } else {
     loading.value = false;
   }
 });
 
-watch(() => props.searchedMovies, (newMovies) => {
-  if (newMovies && newMovies.length > 0) {
-    movies.value = newMovies;
+watch(() => props.watchlistTvShows, (newTvShows) => {
+  if (newTvShows && newTvShows.length > 0) {
+    watchlistTvShows.value = newTvShows;
     loading.value = false;
   }
 });
@@ -73,8 +63,8 @@ watch(() => props.searchedMovies, (newMovies) => {
   flex: 1 1 calc(25% - 16px);
   box-sizing: border-box;
   border: 2px solid var(--color-border);
-  background: var(--color-background-dark);
   border-radius: 8px;
+  background: var(--color-background-dark);
   overflow: hidden;
   text-align: center;
   position: relative;
@@ -129,7 +119,7 @@ watch(() => props.searchedMovies, (newMovies) => {
   }
 }
 
-.add-button {
+.remove-button {
   display: none;
   position: absolute;
   bottom: 10px;
@@ -144,7 +134,7 @@ watch(() => props.searchedMovies, (newMovies) => {
   cursor: pointer;
 }
 
-.movie-card:hover .add-button {
+.movie-card:hover .remove-button {
   display: block;
 }
 </style>

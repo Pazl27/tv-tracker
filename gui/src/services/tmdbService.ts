@@ -104,3 +104,20 @@ export const searchShows = async (invokeFunction: any, query: string) => {
     return [];
   }
 }
+
+export const fetchMovieWatchlist = async (invokeFunction: any) => {
+  // Fetch from API if not cached
+  try {
+    const result: any[] = await invokeFunction('get_watchlist_movies');
+    const movies = result.map((movie: any) => ({
+      ...movie,
+      poster_url: `https://image.tmdb.org/t/p/original${movie.poster_path}`,
+    }));
+
+    return movies;
+  } catch (error) {
+    console.error('Failed to fetch trending movies:', error);
+    return [];
+  }
+
+}

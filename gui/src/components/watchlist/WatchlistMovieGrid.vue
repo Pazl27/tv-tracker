@@ -6,47 +6,70 @@
       <div class="skeleton-title"></div>
     </div>
 
-    <!-- Watchlist Cards -->
-    <div v-else class="movie-card" v-for="item in watchlistItems" :key="item.id">
-      <img :src="item.poster_url" :alt="item.title || item.name" class="movie-poster" />
-      <h3 class="movie-title">{{ item.title || item.name }}</h3>
-      <button class="remove-button" @click="removeFromWatchlist(item)"><i class="minus-icon">-</i></button>
+    <!-- Movie Cards -->
+    <div v-else class="movie-card" v-for="movie in filteredMovies" :key="movie.id">
+      <img :src="movie.poster_url" :alt="movie.title" class="movie-poster" />
+      <h3 class="movie-title">{{ movie.title }}</h3>
+      <button class="remove-button" @click="removeFromWatchlist(movie)"><i class="minus-icon">-</i></button>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, watch } from 'vue';
-import { defineProps } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { invoke } from "@tauri-apps/api/core";
+import { defineProps } from 'vue';
+import { fetchMovieWatchlist } from '../../services/tmdbService';
 
-const props = defineProps<{ watchlistItems: any[] }>();
+const props = defineProps<{ watchlistMovies: any[], searchQuery: string }>();
 
+const watchlistMovies = ref<any[]>(props.watchlistMovies || []);
 const loading = ref(true);
 
-const removeFromWatchlist = async (item: any) => {
+const removeFromWatchlist = async (movie: any) => {
   try {
-    await invoke('remove_from_watchlist', { item });
-    console.log('Removed from watchlist:', item);
+    await invoke('remove_movie_from_watchlist', { movie });
+    console.log('Removed from watchlist:', movie);
     // Optionally, you can emit an event to notify the parent component to update the watchlist
   } catch (error) {
-    console.error('Failed to remove item from watchlist:', error);
+    console.error('Failed to remove movie from watchlist:', error);
   }
 };
 
-onMounted(() => {
-  if (props.watchlistItems.length === 0) {
+const loadMovies = async () => {
+  try {
+    watchlistMovies.value = await fetchMovieWatchlist(invoke);
+  } catch (error) {
+    console.error('Failed to load movies:', error);
+  } finally {
     loading.value = false;
+  }
+};
+
+const filteredMovies = computed(() => {
+  if (!props.searchQuery) {
+    return watchlistMovies.value;
+  }
+  return watchlistMovies.value.filter(movie =>
+    movie.title.toLowerCase().includes(props.searchQuery.toLowerCase())
+  );
+});
+
+onMounted(() => {
+  if (watchlistMovies.value.length === 0) {
+    loadMovies();
   } else {
     loading.value = false;
   }
 });
 
-watch(() => props.watchlistItems, (newItems) => {
-  if (newItems && newItems.length > 0) {
+watch(() => props.watchlistMovies, (newMovies) => {
+  if (newMovies && newMovies.length > 0) {
+    watchlistMovies.value = newMovies;
     loading.value = false;
   }
 });
+
 </script>
 
 <style scoped>
@@ -64,7 +87,7 @@ watch(() => props.watchlistItems, (newItems) => {
   border-radius: 8px;
   overflow: hidden;
   text-align: center;
-  position: relative; /* Ensure the button is positioned correctly */
+  position: relative;
 }
 
 .movie-card:hover {
