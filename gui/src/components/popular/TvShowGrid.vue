@@ -29,7 +29,7 @@ const loading = ref(true);
 const loadTvShows = async () => {
   try {
     tvShows.value = await fetchTvShows(invoke);
-    console.log(tvShows.value.length)
+    console.log(tvShows.value.length);
   } catch (error) {
     console.error('Failed to load TV shows:', error);
   } finally {
@@ -56,13 +56,12 @@ watch(() => props.searchedTvShows, (newTvShows) => {
 
 <style scoped>
 .movie-grid {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
   gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 }
 
 .movie-card, .skeleton-loader {
-  flex: 1 1 calc(25% - 16px);
   box-sizing: border-box;
   border: 2px solid var(--color-border);
   border-radius: 3%;
@@ -98,7 +97,7 @@ watch(() => props.searchedTvShows, (newTvShows) => {
 .skeleton-poster {
   width: 100%;
   height: 300px;
-  background: var (--color-background-dark);
+  background: var(--color-background-dark);
 }
 
 .skeleton-title {
@@ -117,6 +116,37 @@ watch(() => props.searchedTvShows, (newTvShows) => {
   }
   100% {
     background-color: var(--color-background-light);
+  }
+}
+
+/* Responsive Styles */
+@media (min-width: 1200px) {
+  .movie-grid {
+    grid-template-columns: repeat(8, 1fr); /* 8 cards per row */
+  }
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+  .movie-grid {
+    grid-template-columns: repeat(6, 1fr); /* 6 cards per row */
+  }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  .movie-grid {
+    grid-template-columns: repeat(4, 1fr); /* 4 cards per row */
+  }
+}
+
+@media (max-width: 767px) {
+  .movie-grid {
+    grid-template-columns: repeat(2, 1fr); /* 2 cards per row */
+  }
+}
+
+@media (max-width: 480px) {
+  .movie-grid {
+    grid-template-columns: repeat(1, 1fr); /* 1 card per row */
   }
 }
 </style>
