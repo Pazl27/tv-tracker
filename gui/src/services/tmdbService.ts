@@ -66,6 +66,7 @@ export const fetchTvShows = async (invokeFunction: any) => {
       ...show,
       poster_url: `https://image.tmdb.org/t/p/original${show.poster_path}`,
     }));
+    console.log(tvShows.length)
 
     // Cache the TV shows
     setToCache(TV_SHOWS_CACHE_KEY, tvShows);
@@ -101,6 +102,40 @@ export const searchShows = async (invokeFunction: any, query: string) => {
 
   } catch (error) {
     console.error('Failed to search movies:', error);
+    return [];
+  }
+}
+
+export const fetchMovieWatchlist = async (invokeFunction: any) => {
+  // Fetch from API if not cached
+  try {
+    const result: any[] = await invokeFunction('get_watchlist_movies');
+    const movies = result.map((movie: any) => ({
+      ...movie,
+      poster_url: `https://image.tmdb.org/t/p/original${movie.poster_path}`,
+    }));
+
+    return movies;
+  } catch (error) {
+    console.error('Failed to fetch trending movies:', error);
+    return [];
+  }
+}
+
+export const fetchShowWatchlist = async (invokeFunction: any) => {
+  
+  try {
+    const result: any[] = await invokeFunction('get_watchlist_shows');
+    console.log("hllelelelelel")
+    console.log(result)
+    const shows = result.map((show: any) => ({
+      ...show,
+      poster_url: `https://image.tmdb.org/t/p/original${show.poster_path}`,
+    }));
+
+    return shows;
+  } catch (error) {
+    console.error('Failed to fetch trending movies:', error);
     return [];
   }
 }
