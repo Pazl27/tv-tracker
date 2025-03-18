@@ -1,4 +1,3 @@
-
 <template>
   <div class="page" v-if="movie">
     <img :src="movie.poster_url" :alt="movie.title" class="movie-poster" />
@@ -12,21 +11,27 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import { getMovieDetails } from '../services/tmdbService';
+import { invoke } from '@tauri-apps/api/core';
 
 const movie = ref<any>(null);
+const route = useRoute();
+
+const fetchMovie = async (movieId: number) => {
+  try {
+    movie.value = await getMovieDetails(invoke, movieId);
+  } catch (error) {
+    console.error('Failed to load movie details:', error);
+  }
+}
 
 onMounted(() => {
-  movie.value = JSON.parse(localStorage.getItem('selectedMovie') || 'null');
-  if (!movie.value) {
-    console.error('Movie data is missing. Ensure it is passed via router state.');
+  const movieId = route.params.id;
+  if (movieId) {
+    fetchMovie(Number(movieId));
+  } else {
+    console.error('Movie ID is missing. Ensure it is passed via router state.');
   }
 });
 </script>
-
-<style scoped>
-.movie-poster {
-  width: 100%;
-  height: 300px;
-  object-fit: cover;
-}
-</style>
