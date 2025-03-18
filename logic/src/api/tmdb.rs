@@ -29,6 +29,7 @@ pub struct MovieDetail {
     pub overview: String,
     pub genres: Vec<String>,
     pub vote_average: f32,
+    pub release_date: String,
 }
 
 pub struct Tmdb {
@@ -337,6 +338,7 @@ impl Tmdb {
             overview: json["overview"].as_str().unwrap_or("").to_string(),
             genres,
             vote_average: json["vote_average"].as_f64().unwrap_or(0.0) as f32,
+            release_date: json["release_date"].as_str().unwrap_or("").to_string(),
         })
     }
 }
