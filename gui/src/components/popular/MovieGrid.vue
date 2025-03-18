@@ -7,16 +7,17 @@
     </div>
 
     <!-- Movie Cards -->
-    <div v-else class="movie-card" v-for="movie in movies" :key="movie.id">
+    <div v-else class="movie-card" v-for="movie in movies" :key="movie.id" @click="goToMovieDetails(movie)">
       <img :src="movie.poster_url" :alt="movie.title" class="movie-poster" />
       <h3 class="movie-title">{{ movie.title }}</h3>
-      <button class="add-button" @click="addToWatchlist(movie)"><i class="plus-icon">+</i></button>
+      <button class="add-button" @click.stop="addToWatchlist(movie)"><i class="plus-icon">+</i></button>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { ref, onMounted, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { invoke } from "@tauri-apps/api/core";
 import { fetchMovies } from '../../services/tmdbService';
 import { defineProps } from 'vue';
@@ -25,6 +26,8 @@ const props = defineProps<{ searchedMovies: any[] }>();
 
 const movies = ref<any[]>(props.searchedMovies || []);
 const loading = ref(true);
+
+const router = useRouter();
 
 // Fetch trending movies
 const loadMovies = async () => {
@@ -44,6 +47,14 @@ const addToWatchlist = async (movie: any) => {
   } catch (error) {
     console.error('Failed to add movie to watchlist:', error);
   }
+};
+
+const goToMovieDetails = (movie: any) => {
+  localStorage.setItem('selectedMovie', JSON.stringify(movie));
+  router.push({
+    name: 'MovieDetails',
+    params: { id: movie.id }
+  });
 };
 
 onMounted(() => {
