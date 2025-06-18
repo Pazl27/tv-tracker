@@ -105,7 +105,12 @@ impl Sqlight {
     pub fn insert_watched_movie(&self, movie: &WatchedMovie) -> Result<()> {
         self.conn.execute(
             "INSERT INTO watched_movies (id, title, poster_path, rating) VALUES (?1, ?2, ?3, ?4)",
-            params![movie.id, movie.title, movie.poster_path, movie.rating.to_string()],
+            params![
+                movie.id,
+                movie.title,
+                movie.poster_path,
+                movie.rating.to_string()
+            ],
         )?;
         Ok(())
     }

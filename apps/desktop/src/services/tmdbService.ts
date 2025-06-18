@@ -123,7 +123,7 @@ export const fetchMovieWatchlist = async (invokeFunction: any) => {
 }
 
 export const fetchShowWatchlist = async (invokeFunction: any) => {
-  
+
   try {
     const result: any[] = await invokeFunction('get_watchlist_shows');
     console.log("hllelelelelel")
@@ -137,5 +137,18 @@ export const fetchShowWatchlist = async (invokeFunction: any) => {
   } catch (error) {
     console.error('Failed to fetch trending movies:', error);
     return [];
+  }
+}
+
+export const getMovieDetails = async (invokeFunction: any, movieId: number) => {
+  try {
+    const result: any = await invokeFunction('get_movie_details', { id: movieId });
+    return {
+      ...result,
+      poster_url: `https://image.tmdb.org/t/p/original${result.poster_path}`,
+    };
+  } catch (error) {
+    console.error('Failed to fetch movie details:', error);
+    return null;
   }
 }

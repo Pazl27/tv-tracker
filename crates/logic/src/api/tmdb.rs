@@ -20,6 +20,18 @@ pub struct Tv {
     pub poster_path: String,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct MovieDetail {
+    pub id: u32,
+    pub title: String,
+    pub poster_path: String,
+    pub runtime: u32,
+    pub overview: String,
+    pub genres: Vec<String>,
+    pub vote_average: f32,
+    pub release_date: String,
+}
+
 pub struct Tmdb {
     api_key: String,
 }
@@ -204,7 +216,10 @@ impl Tmdb {
         let mut seen_ids = HashSet::new();
 
         for page in 1..=3 {
-            let url = format!("https://api.themoviedb.org/3/trending/movie/day?language=en-US&page={}", page);
+            let url = format!(
+                "https://api.themoviedb.org/3/trending/movie/day?language=en-US&page={}",
+                page
+            );
 
             let response = client
                 .get(&url)
@@ -248,7 +263,10 @@ impl Tmdb {
         let mut seen_ids = HashSet::new();
 
         for page in 1..=3 {
-            let url = format!("https://api.themoviedb.org/3/trending/tv/day?language=en-US&page={}", page);
+            let url = format!(
+                "https://api.themoviedb.org/3/trending/tv/day?language=en-US&page={}",
+                page
+            );
 
             let response = client
                 .get(&url)
@@ -285,6 +303,44 @@ impl Tmdb {
             Some(all_shows)
         }
     }
+
+    pub async fn get_movie_details(&self, id: u32) -> Result<MovieDetail> {
+        let client = Client::new();
+        let url = format!("https://api.themoviedb.org/3/movie/{}?language=en-US", id);
+
+        let response = client
+            .get(&url)
+            .header("Authorization", format!("Bearer {}", self.api_key))
+            .header("accept", "application/json")
+            .send()
+            .await
+            .context("Failed to send request")?;
+
+        let response_text = response
+            .text()
+            .await
+            .context("Failed to read response text")?;
+
+        let json: Value = serde_json::from_str(&response_text).context("Failed to parse JSON")?;
+
+        let genres = json["genres"]
+            .as_array()
+            .unwrap_or(&vec![])
+            .iter()
+            .filter_map(|genre| genre["name"].as_str().map(|s| s.to_string()))
+            .collect();
+
+        Ok(MovieDetail {
+            id: json["id"].as_u64().unwrap_or(0) as u32,
+            title: json["title"].as_str().unwrap_or("").to_string(),
+            poster_path: json["poster_path"].as_str().unwrap_or("").to_string(),
+            runtime: json["runtime"].as_u64().unwrap_or(0) as u32,
+            overview: json["overview"].as_str().unwrap_or("").to_string(),
+            genres,
+            vote_average: json["vote_average"].as_f64().unwrap_or(0.0) as f32,
+            release_date: json["release_date"].as_str().unwrap_or("").to_string(),
+        })
+    }
 }
 
 #[cfg(test)]
@@ -294,8 +350,9 @@ mod test {
     #[tokio::test]
     async fn test() {
         let tmdb = Tmdb::new(TmdbConfig::default());
-        let movies = tmdb.trending_tv().await.unwrap();
+
+        let movies = tmdb.get_movie_details(123).await.unwrap();
+
         println!("{:?}", movies);
-        println!("size {}", movies.len())
     }
 }
