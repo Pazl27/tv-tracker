@@ -1,8 +1,8 @@
 [workspace]
 resolver = "2"
 members = [
-  "gui/src-tauri",
-  "logic"
+  "crates/tauri",
+  "crates/logic"
 ]
 
 [workspace.package]
@@ -12,7 +12,7 @@ version = "0.1.0"
 description = "TV show tracker"
 
 [workspace.dependencies]
-logic = { path = "./logic" }
+logic = { path = "./crates/logic" }
 tauri = { version = "2", features = [] }
 tauri-plugin-opener = "2"
 serde = { version = "1", features = ["derive"] }
