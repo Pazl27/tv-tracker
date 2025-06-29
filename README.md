@@ -1,12 +1,12 @@
 # TV-Tracker
 
-## Pre-requisites
-- Tauri-cli
-```bash
-cargo +nightly install tauri-cli
-```
-
-## How to run
-```
-just tauri-dev
-```
+## How to use
+1. Clone the repository
+2. Install the dependencies
+    ```bash
+    pnpm install
+    ```
+3. Start the development server
+    ```bash
+    pnpm desktop:dev
+    ```

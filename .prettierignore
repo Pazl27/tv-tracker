@@ -1,0 +1,17 @@
+.DS_Store
+node_modules
+target
+build
+dist
+package
+.env
+.env.*
+!.env.example
+crates/
+
+# Ignore files for PNPM, NPM and YARN
+pnpm-lock.yaml
+package-lock.json
+
+# Ignore  minified css
+*.min.css

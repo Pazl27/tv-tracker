@@ -1,12 +1,11 @@
 {
-  "$schema": "https://schema.tauri.app/config/2",
   "productName": "gui",
   "version": "0.1.0",
   "identifier": "com.gui.app",
   "build": {
-    "beforeDevCommand": "npm run dev --prefix ../apps/desktop",
+    "beforeDevCommand": "pnpm dev:internal-tauri",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "npm run build --prefix ../apps/desktop",
+    "beforeBuildCommand": "pnpm run build --prefix ../apps/desktop",
     "frontendDist": "../apps/desktop/dist"
   },
   "app": {
