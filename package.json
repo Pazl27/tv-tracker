@@ -8,7 +8,7 @@
     "crates/*"
   ],
   "scripts": {
-    "dev:desktop": "cargo build && pnpm tauri dev",
+    "desktop:dev": "cargo build && pnpm tauri dev",
     "tauri": "tauri",
     "dev:internal-tauri": "pnpm --filter @tv-tracker/desktop run dev",
     "prettier:desktop": "prettier --check 'apps/desktop/**/*.{js,ts,vue,css,scss,md,json}'",

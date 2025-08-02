@@ -33,6 +33,7 @@ pub struct MovieDetail {
 }
 
 pub struct Tmdb {
+    url: String,
     api_key: String,
 }
 
@@ -40,6 +41,7 @@ impl Tmdb {
     pub fn new(config: TmdbConfig) -> Self {
         Tmdb {
             api_key: config.api_key(),
+            url: "https://api.themoviedb.org/3".to_string(),
         }
     }
 
@@ -66,7 +68,8 @@ impl Tmdb {
     pub async fn find_movies(&self, query: &str) -> Option<Vec<Movie>> {
         let client = Client::new();
         let url = format!(
-        "https://api.themoviedb.org/3/search/movie?query={}&include_adult=false&language=en-US&page=1",
+        "{}/search/movie?query={}&include_adult=false&language=en-US&page=1",
+        self.url,
         query
     );
         let response = client
@@ -104,7 +107,8 @@ impl Tmdb {
     pub async fn find_tv(&self, query: &str) -> Option<Vec<Tv>> {
         let client = Client::new();
         let url = format!(
-            "https://api.themoviedb.org/3/search/tv?query={}&include_adult=false&language=en-US&page=1",
+            "{}/search/tv?query={}&include_adult=false&language=en-US&page=1",
+            self.url,
             query
         );
 
@@ -143,7 +147,8 @@ impl Tmdb {
     pub async fn find_movie_image_url(&self, id: u32) -> Option<String> {
         let client = Client::new();
         let url = format!(
-            "https://api.themoviedb.org/3/movie/{}/images?include_image_language=en",
+            "{}/movie/{}/images?include_image_language=en",
+            self.url,
             id
         );
 
@@ -178,7 +183,8 @@ impl Tmdb {
     pub async fn find_tv_image_url(&self, id: u32) -> Option<String> {
         let client = Client::new();
         let url = format!(
-            "https://api.themoviedb.org/3/tv/{}/images?include_image_language=en",
+            "{}/tv/{}/images?include_image_language=en",
+            self.url,
             id
         );
 
@@ -217,7 +223,8 @@ impl Tmdb {
 
         for page in 1..=3 {
             let url = format!(
-                "https://api.themoviedb.org/3/trending/movie/day?language=en-US&page={}",
+                "{}/trending/movie/day?language=en-US&page={}",
+                self.url,
                 page
             );
 
@@ -264,7 +271,8 @@ impl Tmdb {
 
         for page in 1..=3 {
             let url = format!(
-                "https://api.themoviedb.org/3/trending/tv/day?language=en-US&page={}",
+                "{}/trending/tv/day?language=en-US&page={}",
+                self.url,
                 page
             );
 
@@ -306,7 +314,11 @@ impl Tmdb {
 
     pub async fn get_movie_details(&self, id: u32) -> Result<MovieDetail> {
         let client = Client::new();
-        let url = format!("https://api.themoviedb.org/3/movie/{}?language=en-US", id);
+        let url = format!(
+            "{}/movie/{}?language=en-US",
+            self.url,
+             id
+        );
 
         let response = client
             .get(&url)
