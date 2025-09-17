@@ -24,3 +24,14 @@ pub struct WatchedMovie {
     pub poster_path: String,
     pub rating: f32,
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct WatchedTvShow {
+    pub id: i32,
+    pub name: String,
+    pub poster_path: String,
+    pub first_air_date: String,
+    pub vote_average: f32,
+    pub overview: String,
+    pub rating: f32,
+}

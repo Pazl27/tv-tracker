@@ -24,6 +24,15 @@ pub fn run() {
             add_show_to_watchlist,
             get_watchlist_shows,
             remove_show_from_watchlist,
+            // Rating Commands
+            rate_movie,
+            rate_tv_show,
+            get_movie_rating,
+            get_tv_show_rating,
+            remove_movie_rating,
+            remove_tv_show_rating,
+            get_all_rated_movies,
+            get_all_rated_tv_shows,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

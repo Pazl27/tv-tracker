@@ -7,12 +7,15 @@
 import { onMounted } from 'vue'
 import ToastContainer from './components/ToastContainer.vue'
 import { useWatchlistStore } from './stores/watchlistStore'
+import { useRatingStore } from './stores/ratingStore'
 
 const { initializeWatchlist } = useWatchlistStore()
+const { initializeRatings } = useRatingStore()
 
 onMounted(() => {
-  // Initialize watchlist data when app loads
+  // Initialize watchlist and ratings data when app loads
   initializeWatchlist()
+  initializeRatings()
 })
 </script>
 

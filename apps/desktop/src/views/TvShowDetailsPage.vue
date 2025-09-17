@@ -101,6 +101,19 @@
             </div>
           </div>
 
+          <!-- Rating Section -->
+          <div class="rating-section">
+            <h3 class="section-title">Your Rating</h3>
+            <StarRating
+              v-model="currentRating"
+              @change="handleRatingChange"
+              @clear="handleRatingClear"
+              :show-rating-text="true"
+              :show-clear-button="true"
+              size="large"
+            />
+          </div>
+
           <!-- Overview -->
           <div class="overview-section">
             <h3 class="section-title">Overview</h3>
@@ -154,19 +167,27 @@ import { useRoute, useRouter } from 'vue-router';
 import { getTvShowDetails } from '../services/tmdbService';
 import { invoke } from '@tauri-apps/api/core';
 import { useWatchlistStore } from '../stores/watchlistStore';
+import { useRatingStore } from '../stores/ratingStore';
 import { useToast } from '../composables/useToast';
+import StarRating from '../components/StarRating.vue';
 
 const tvShow = ref<any>(null);
 const loading = ref(true);
+const currentRating = ref(0);
 const route = useRoute();
 const router = useRouter();
 const { isTvShowInWatchlist, addTvShowToWatchlist, removeTvShowFromWatchlist } = useWatchlistStore();
+const { getTvShowRating, rateTvShow, removeTvShowRating } = useRatingStore();
 const { success, error } = useToast();
 
 const fetchTvShow = async (showId: number) => {
   try {
     loading.value = true;
     tvShow.value = await getTvShowDetails(invoke, showId);
+    
+    // Load existing rating if any
+    const existingRating = getTvShowRating.value(showId);
+    currentRating.value = existingRating;
   } catch (error) {
     console.error('Failed to load TV show details:', error);
   } finally {
@@ -256,6 +277,34 @@ const formatRuntime = (minutes: number) => {
     return `${hours}h ${mins}m`;
   }
   return `${mins}m`;
+};
+
+const handleRatingChange = async (rating: number) => {
+  if (!tvShow.value) return;
+  
+  try {
+    await rateTvShow(tvShow.value, rating);
+    currentRating.value = rating;
+    success('TV Show Rated', `You rated ${tvShow.value.name} ${rating}/5 stars`);
+  } catch (err) {
+    console.error('Failed to rate TV show:', err);
+    error('Rating Error', 'Failed to save your rating. Please try again.');
+    // Revert the rating on error
+    currentRating.value = getTvShowRating.value(tvShow.value.id);
+  }
+};
+
+const handleRatingClear = async () => {
+  if (!tvShow.value) return;
+  
+  try {
+    await removeTvShowRating(tvShow.value.id);
+    currentRating.value = 0;
+    success('Rating Removed', `Removed your rating for ${tvShow.value.name}`);
+  } catch (err) {
+    console.error('Failed to remove TV show rating:', err);
+    error('Rating Error', 'Failed to remove your rating. Please try again.');
+  }
 };
 
 onMounted(() => {
@@ -567,6 +616,18 @@ onMounted(() => {
   line-height: 1.7;
   color: var(--color-text-secondary);
   margin: 0;
+}
+
+.rating-section {
+  padding: var(--spacing-xl);
+  background: var(--color-surface);
+  border-radius: var(--radius-large);
+  border: 1px solid var(--color-border);
+  margin-bottom: var(--spacing-xl);
+}
+
+.rating-section .section-title {
+  margin-bottom: var(--spacing-lg);
 }
 
 .details-grid {

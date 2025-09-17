@@ -96,6 +96,19 @@
             </div>
           </div>
 
+          <!-- Rating Section -->
+          <div class="rating-section">
+            <h3 class="section-title">Your Rating</h3>
+            <StarRating
+              v-model="currentRating"
+              @change="handleRatingChange"
+              @clear="handleRatingClear"
+              :show-rating-text="true"
+              :show-clear-button="true"
+              size="large"
+            />
+          </div>
+
           <!-- Overview -->
           <div class="overview-section">
             <h3 class="section-title">Overview</h3>
@@ -145,19 +158,27 @@ import { useRoute, useRouter } from 'vue-router';
 import { getMovieDetails } from '../services/tmdbService';
 import { invoke } from '@tauri-apps/api/core';
 import { useWatchlistStore } from '../stores/watchlistStore';
+import { useRatingStore } from '../stores/ratingStore';
 import { useToast } from '../composables/useToast';
+import StarRating from '../components/StarRating.vue';
 
 const movie = ref<any>(null);
 const loading = ref(true);
+const currentRating = ref(0);
 const route = useRoute();
 const router = useRouter();
 const { isMovieInWatchlist, addMovieToWatchlist, removeMovieFromWatchlist } = useWatchlistStore();
+const { getMovieRating, rateMovie, removeMovieRating } = useRatingStore();
 const { success, error } = useToast();
 
 const fetchMovie = async (movieId: number) => {
   try {
     loading.value = true;
     movie.value = await getMovieDetails(invoke, movieId);
+    
+    // Load existing rating if any
+    const existingRating = getMovieRating.value(movieId);
+    currentRating.value = existingRating;
   } catch (error) {
     console.error('Failed to load movie details:', error);
   } finally {
@@ -244,6 +265,34 @@ const formatRuntime = (minutes: number) => {
   const hours = Math.floor(minutes / 60);
   const mins = minutes % 60;
   return `${hours}h ${mins}m`;
+};
+
+const handleRatingChange = async (rating: number) => {
+  if (!movie.value) return;
+  
+  try {
+    await rateMovie(movie.value, rating);
+    currentRating.value = rating;
+    success('Movie Rated', `You rated ${movie.value.title} ${rating}/5 stars`);
+  } catch (err) {
+    console.error('Failed to rate movie:', err);
+    error('Rating Error', 'Failed to save your rating. Please try again.');
+    // Revert the rating on error
+    currentRating.value = getMovieRating.value(movie.value.id);
+  }
+};
+
+const handleRatingClear = async () => {
+  if (!movie.value) return;
+  
+  try {
+    await removeMovieRating(movie.value.id);
+    currentRating.value = 0;
+    success('Rating Removed', `Removed your rating for ${movie.value.title}`);
+  } catch (err) {
+    console.error('Failed to remove movie rating:', err);
+    error('Rating Error', 'Failed to remove your rating. Please try again.');
+  }
 };
 
 onMounted(() => {
@@ -555,6 +604,18 @@ onMounted(() => {
   line-height: 1.7;
   color: var(--color-text-secondary);
   margin: 0;
+}
+
+.rating-section {
+  padding: var(--spacing-xl);
+  background: var(--color-surface);
+  border-radius: var(--radius-large);
+  border: 1px solid var(--color-border);
+  margin-bottom: var(--spacing-xl);
+}
+
+.rating-section .section-title {
+  margin-bottom: var(--spacing-lg);
 }
 
 .details-grid {
