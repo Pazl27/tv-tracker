@@ -59,6 +59,15 @@ pub async fn get_movie_details(id: u32) -> Result<api::MovieDetail, String> {
     }
 }
 
+#[tauri::command]
+pub async fn get_tv_show_details(id: u32) -> Result<api::TvDetail, String> {
+    let tmdb = api::Tmdb::new(logic::TmdbConfig::default());
+    match tmdb.get_tv_show_details(id).await {
+        Ok(show) => Ok(show),
+        Err(_) => Err("Failed to fetch TV show details".into()),
+    }
+}
+
 // Movie Watchlist Commands
 
 #[tauri::command]
@@ -107,6 +116,9 @@ pub async fn add_show_to_watchlist(show: serde_json::Value) -> Result<(), String
     let show_id = show["id"].as_i64().unwrap_or(0) as i32;
     let show_name = show["name"].as_str().unwrap_or("").to_string();
     let show_poster_path = show["poster_path"].as_str().unwrap_or("").to_string();
+    let show_first_air_date = show["first_air_date"].as_str().unwrap_or("").to_string();
+    let show_vote_average = show["vote_average"].as_f64().unwrap_or(0.0) as f32;
+    let show_overview = show["overview"].as_str().unwrap_or("").to_string();
     
     if show_id == 0 {
         return Err("Invalid show ID".to_string());
@@ -120,6 +132,9 @@ pub async fn add_show_to_watchlist(show: serde_json::Value) -> Result<(), String
         id: show_id,
         name: show_name,
         poster_path: show_poster_path,
+        first_air_date: show_first_air_date,
+        vote_average: show_vote_average,
+        overview: show_overview,
     };
     
     println!("Inserting TV show: {:?}", tv_show);

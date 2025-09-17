@@ -1,7 +1,7 @@
 <template>
-  <div class="movie-details-page">
+  <div class="tvshow-details-page">
     <!-- Loading state -->
-    <div v-if="!movie" class="loading-container">
+    <div v-if="!tvShow" class="loading-container">
       <div class="loading-skeleton">
         <div class="skeleton-poster animate-shimmer"></div>
         <div class="skeleton-info">
@@ -14,16 +14,16 @@
       </div>
     </div>
 
-    <!-- Movie details content -->
-    <div v-else class="movie-details-container">
+    <!-- TV Show details content -->
+    <div v-else class="tvshow-details-container">
       <!-- Background -->
-      <div class="movie-background">
-        <img :src="movie.poster_url" :alt="movie.title" class="background-image" />
+      <div class="tvshow-background">
+        <img :src="tvShow.poster_url" :alt="tvShow.name" class="background-image" />
         <div class="background-overlay"></div>
       </div>
 
       <!-- Navigation -->
-      <nav class="movie-nav">
+      <nav class="tvshow-nav">
         <button @click="goBack" class="back-button">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -32,26 +32,26 @@
         </button>
       </nav>
 
-      <!-- Movie content -->
-      <div class="movie-content">
-        <div class="movie-poster-section">
+      <!-- TV Show content -->
+      <div class="tvshow-content">
+        <div class="tvshow-poster-section">
           <div class="poster-container">
-            <img :src="movie.poster_url" :alt="movie.title" class="movie-poster" />
+            <img :src="tvShow.poster_url" :alt="tvShow.name" class="tvshow-poster" />
             <div class="poster-actions">
               <button 
                 class="action-btn primary" 
                 @click="toggleWatchlist"
-                :class="{ 'in-watchlist': movie && isMovieInWatchlist(movie.id) }"
+                :class="{ 'in-watchlist': tvShow && isTvShowInWatchlist(tvShow.id) }"
               >
-                <svg v-if="!movie || !isMovieInWatchlist(movie.id)" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg v-if="!tvShow || !isTvShowInWatchlist(tvShow.id)" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
                 <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-                {{ movie && isMovieInWatchlist(movie.id) ? 'Remove from Watchlist' : 'Add to Watchlist' }}
+                {{ tvShow && isTvShowInWatchlist(tvShow.id) ? 'Remove from Watchlist' : 'Add to Watchlist' }}
               </button>
-              <button class="action-btn secondary" @click="shareMovie">
+              <button class="action-btn secondary" @click="shareShow">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M4 12V20C4 20.5523 4.44772 21 5 21H19C19.5523 21 20 20.5523 20 20V12M16 6L12 2L8 6M12 2V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
@@ -61,36 +61,41 @@
           </div>
         </div>
 
-        <div class="movie-info-section">
+        <div class="tvshow-info-section">
           <!-- Title and basic info -->
-          <div class="movie-header">
-            <h1 class="movie-title">{{ movie.title }}</h1>
-            <div class="movie-meta">
+          <div class="tvshow-header">
+            <h1 class="tvshow-title">{{ tvShow.name }}</h1>
+            <div class="tvshow-meta">
               <div class="meta-item">
-                <span class="meta-label">Year</span>
-                <span class="meta-value">{{ new Date(movie.release_date).getFullYear() }}</span>
+                <span class="meta-label">First Aired</span>
+                <span class="meta-value">{{ new Date(tvShow.first_air_date).getFullYear() }}</span>
+              </div>
+              <div class="meta-separator">•</div>
+              <div class="meta-item" v-if="tvShow.episode_run_time && tvShow.episode_run_time.length">
+                <span class="meta-label">Episode Runtime</span>
+                <span class="meta-value">{{ tvShow.episode_run_time[0] }} min</span>
               </div>
               <div class="meta-separator">•</div>
               <div class="meta-item">
-                <span class="meta-label">Runtime</span>
-                <span class="meta-value">{{ movie.runtime }} min</span>
+                <span class="meta-label">Status</span>
+                <span class="meta-value">{{ tvShow.status }}</span>
               </div>
               <div class="meta-separator">•</div>
               <div class="rating-container">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
                 </svg>
-                <span class="rating-value">{{ movie.vote_average.toFixed(1) }}</span>
+                <span class="rating-value">{{ tvShow.vote_average.toFixed(1) }}</span>
                 <span class="rating-max">/10</span>
               </div>
             </div>
           </div>
 
           <!-- Genres -->
-          <div class="genres-section" v-if="movie.genres && movie.genres.length">
+          <div class="genres-section" v-if="tvShow.genres && tvShow.genres.length">
             <h3 class="section-title">Genres</h3>
             <div class="genres-list">
-              <span v-for="genre in movie.genres" :key="genre" class="genre-tag">
+              <span v-for="genre in tvShow.genres" :key="genre" class="genre-tag">
                 {{ genre }}
               </span>
             </div>
@@ -99,26 +104,30 @@
           <!-- Overview -->
           <div class="overview-section">
             <h3 class="section-title">Overview</h3>
-            <p class="overview-text">{{ movie.overview }}</p>
+            <p class="overview-text">{{ tvShow.overview }}</p>
           </div>
 
           <!-- Additional details -->
           <div class="details-grid">
-            <div class="detail-item" v-if="movie.release_date">
-              <span class="detail-label">Release Date</span>
-              <span class="detail-value">{{ formatDate(movie.release_date) }}</span>
+            <div class="detail-item" v-if="tvShow.first_air_date">
+              <span class="detail-label">First Air Date</span>
+              <span class="detail-value">{{ formatDate(tvShow.first_air_date) }}</span>
             </div>
-            <div class="detail-item" v-if="movie.runtime">
-              <span class="detail-label">Duration</span>
-              <span class="detail-value">{{ formatRuntime(movie.runtime) }}</span>
+            <div class="detail-item" v-if="tvShow.number_of_seasons">
+              <span class="detail-label">Seasons</span>
+              <span class="detail-value">{{ tvShow.number_of_seasons }}</span>
             </div>
-            <div class="detail-item" v-if="movie.vote_count">
-              <span class="detail-label">Vote Count</span>
-              <span class="detail-value">{{ movie.vote_count.toLocaleString() }}</span>
+            <div class="detail-item" v-if="tvShow.number_of_episodes">
+              <span class="detail-label">Episodes</span>
+              <span class="detail-value">{{ tvShow.number_of_episodes }}</span>
             </div>
-            <div class="detail-item" v-if="movie.popularity">
-              <span class="detail-label">Popularity</span>
-              <span class="detail-value">{{ Math.round(movie.popularity) }}</span>
+            <div class="detail-item" v-if="tvShow.status">
+              <span class="detail-label">Status</span>
+              <span class="detail-value">{{ tvShow.status }}</span>
+            </div>
+            <div class="detail-item" v-if="tvShow.episode_run_time && tvShow.episode_run_time.length">
+              <span class="detail-label">Avg Episode Length</span>
+              <span class="detail-value">{{ formatRuntime(tvShow.episode_run_time[0]) }}</span>
             </div>
           </div>
         </div>
@@ -126,13 +135,13 @@
     </div>
 
     <!-- No data state -->
-    <div v-if="!movie && !loading" class="no-data-container">
+    <div v-if="!tvShow && !loading" class="no-data-container">
       <div class="no-data-content">
         <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M12 9V13M12 17H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        <h3>Movie Not Found</h3>
-        <p>The movie data could not be loaded. Please try again.</p>
+        <h3>TV Show Not Found</h3>
+        <p>The TV show data could not be loaded. Please try again.</p>
         <button @click="goBack" class="btn-primary">Go Back</button>
       </div>
     </div>
@@ -142,24 +151,24 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { getMovieDetails } from '../services/tmdbService';
+import { getTvShowDetails } from '../services/tmdbService';
 import { invoke } from '@tauri-apps/api/core';
 import { useWatchlistStore } from '../stores/watchlistStore';
 import { useToast } from '../composables/useToast';
 
-const movie = ref<any>(null);
+const tvShow = ref<any>(null);
 const loading = ref(true);
 const route = useRoute();
 const router = useRouter();
-const { isMovieInWatchlist, addMovieToWatchlist, removeMovieFromWatchlist } = useWatchlistStore();
+const { isTvShowInWatchlist, addTvShowToWatchlist, removeTvShowFromWatchlist } = useWatchlistStore();
 const { success, error } = useToast();
 
-const fetchMovie = async (movieId: number) => {
+const fetchTvShow = async (showId: number) => {
   try {
     loading.value = true;
-    movie.value = await getMovieDetails(invoke, movieId);
+    tvShow.value = await getTvShowDetails(invoke, showId);
   } catch (error) {
-    console.error('Failed to load movie details:', error);
+    console.error('Failed to load TV show details:', error);
   } finally {
     loading.value = false;
   }
@@ -167,7 +176,7 @@ const fetchMovie = async (movieId: number) => {
 
 const goBack = () => {
   // Get navigation context from localStorage
-  const contextStr = localStorage.getItem('movieNavigationContext');
+  const contextStr = localStorage.getItem('tvShowNavigationContext');
   
   if (contextStr) {
     try {
@@ -176,19 +185,19 @@ const goBack = () => {
       if (context.from === 'watchlist') {
         router.push({
           path: '/watchlist',
-          query: { tab: 'movies' }
+          query: { tab: 'tvShows' }
         });
       } else if (context.from === 'popular') {
         router.push({
           path: '/popular',
-          query: { tab: 'movies' }
+          query: { tab: 'tvShows' }
         });
       } else {
         router.go(-1);
       }
       
       // Clean up the context after use
-      localStorage.removeItem('movieNavigationContext');
+      localStorage.removeItem('tvShowNavigationContext');
     } catch (error) {
       console.error('Error parsing navigation context:', error);
       router.go(-1);
@@ -199,15 +208,15 @@ const goBack = () => {
 };
 
 const toggleWatchlist = async () => {
-  if (!movie.value) return;
+  if (!tvShow.value) return;
   
   try {
-    if (isMovieInWatchlist(movie.value.id)) {
-      await removeMovieFromWatchlist(movie.value);
-      success('Removed from Watchlist', `${movie.value.title} has been removed from your watchlist`);
+    if (isTvShowInWatchlist(tvShow.value.id)) {
+      await removeTvShowFromWatchlist(tvShow.value);
+      success('Removed from Watchlist', `${tvShow.value.name} has been removed from your watchlist`);
     } else {
-      await addMovieToWatchlist(movie.value);
-      success('Added to Watchlist', `${movie.value.title} has been added to your watchlist`);
+      await addTvShowToWatchlist(tvShow.value);
+      success('Added to Watchlist', `${tvShow.value.name} has been added to your watchlist`);
     }
   } catch (err) {
     console.error('Failed to update watchlist:', err);
@@ -215,19 +224,19 @@ const toggleWatchlist = async () => {
   }
 };
 
-const shareMovie = () => {
-  if (!movie.value) return;
+const shareShow = () => {
+  if (!tvShow.value) return;
   
   if (navigator.share) {
     navigator.share({
-      title: movie.value.title,
-      text: movie.value.overview,
+      title: tvShow.value.name,
+      text: tvShow.value.overview,
       url: window.location.href,
     });
   } else {
     // Fallback: copy to clipboard
     navigator.clipboard.writeText(window.location.href);
-    // TODO: Add toast notification
+    success('Link Copied', 'Show link has been copied to clipboard');
   }
 };
 
@@ -243,22 +252,25 @@ const formatDate = (dateString: string) => {
 const formatRuntime = (minutes: number) => {
   const hours = Math.floor(minutes / 60);
   const mins = minutes % 60;
-  return `${hours}h ${mins}m`;
+  if (hours > 0) {
+    return `${hours}h ${mins}m`;
+  }
+  return `${mins}m`;
 };
 
 onMounted(() => {
-  const movieId = route.params.id;
-  if (movieId) {
-    fetchMovie(Number(movieId));
+  const showId = route.params.id;
+  if (showId) {
+    fetchTvShow(Number(showId));
   } else {
-    console.error('Movie ID is missing. Ensure it is passed via router state.');
+    console.error('TV Show ID is missing. Ensure it is passed via router state.');
     loading.value = false;
   }
 });
 </script>
 
 <style scoped>
-.movie-details-page {
+.tvshow-details-page {
   min-height: 100vh;
   background: var(--color-background);
 }
@@ -313,13 +325,13 @@ onMounted(() => {
   width: 70%;
 }
 
-/* Movie Details */
-.movie-details-container {
+/* TV Show Details */
+.tvshow-details-container {
   position: relative;
   min-height: 100vh;
 }
 
-.movie-background {
+.tvshow-background {
   position: fixed;
   top: 0;
   left: 0;
@@ -350,7 +362,7 @@ onMounted(() => {
   );
 }
 
-.movie-nav {
+.tvshow-nav {
   position: sticky;
   top: 0;
   z-index: 100;
@@ -381,7 +393,7 @@ onMounted(() => {
   color: var(--color-accent-primary);
 }
 
-.movie-content {
+.tvshow-content {
   display: grid;
   grid-template-columns: 300px 1fr;
   gap: var(--spacing-2xl);
@@ -398,7 +410,7 @@ onMounted(() => {
   top: 120px;
 }
 
-.movie-poster {
+.tvshow-poster {
   width: 100%;
   aspect-ratio: 2/3;
   object-fit: cover;
@@ -458,20 +470,20 @@ onMounted(() => {
   color: var(--color-accent-secondary);
 }
 
-/* Movie Info Section */
-.movie-info-section {
+/* TV Show Info Section */
+.tvshow-info-section {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-2xl);
 }
 
-.movie-header {
+.tvshow-header {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
 }
 
-.movie-title {
+.tvshow-title {
   font-size: 3rem;
   font-weight: 700;
   color: var(--color-text-primary);
@@ -479,7 +491,7 @@ onMounted(() => {
   margin: 0;
 }
 
-.movie-meta {
+.tvshow-meta {
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
@@ -614,20 +626,37 @@ onMounted(() => {
   margin-bottom: var(--spacing-lg);
 }
 
+.btn-primary {
+  background: var(--color-accent-primary);
+  color: white;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border: none;
+  border-radius: var(--radius-medium);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  min-height: auto;
+}
+
+.btn-primary:hover {
+  background: var(--color-accent-primary-hover);
+  transform: translateY(-1px);
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
-  .movie-content {
+  .tvshow-content {
     grid-template-columns: 250px 1fr;
     gap: var(--spacing-xl);
   }
   
-  .movie-title {
+  .tvshow-title {
     font-size: 2.5rem;
   }
 }
 
 @media (max-width: 768px) {
-  .movie-content {
+  .tvshow-content {
     grid-template-columns: 1fr;
     gap: var(--spacing-lg);
     padding: var(--spacing-lg);
@@ -639,12 +668,12 @@ onMounted(() => {
     margin: 0 auto;
   }
   
-  .movie-title {
+  .tvshow-title {
     font-size: 2rem;
     text-align: center;
   }
   
-  .movie-meta {
+  .tvshow-meta {
     justify-content: center;
   }
   
@@ -664,15 +693,15 @@ onMounted(() => {
 }
 
 @media (max-width: 480px) {
-  .movie-nav {
+  .tvshow-nav {
     padding: var(--spacing-md);
   }
   
-  .movie-content {
+  .tvshow-content {
     padding: var(--spacing-md);
   }
   
-  .movie-title {
+  .tvshow-title {
     font-size: 1.75rem;
   }
   

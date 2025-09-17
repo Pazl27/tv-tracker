@@ -18,14 +18,17 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { invoke } from "@tauri-apps/api/core";
+import { useRoute, useRouter } from 'vue-router';
 import TabBar from '../components/TabBar.vue';
 import WatchlistMovieGrid from '../components/watchlist/WatchlistMovieGrid.vue';
 import WatchlistTvShowGrid from '../components/watchlist/WatchlistTvShowGrid.vue';
 import { searchMovies, searchShows } from '../services/tmdbService';
 import { useWatchlistStore } from '../stores/watchlistStore';
 
+const route = useRoute();
+const router = useRouter();
 const activeSubTab = ref('movies');
 const searchQuery = ref('');
 const showDebug = ref(true); // Enable debugging
@@ -43,6 +46,12 @@ const {
 const handleSubTabSwitched = (subTab: string) => {
   console.log('Switching to tab:', subTab);
   activeSubTab.value = subTab;
+
+  // Update URL query parameter to preserve tab state
+  router.replace({
+    path: '/watchlist',
+    query: { tab: subTab }
+  });
 
   // Load data when switching to TV shows if not loaded yet
   if (subTab === 'tvShows' && watchlistTvShows.value.length === 0 && !isLoadingTvShows.value) {
@@ -85,10 +94,24 @@ const searchTvShowsHandler = async (query: string) => {
   }
 };
 
+// Watch for route query changes to set the correct tab
+watch(() => route.query.tab, (newTab) => {
+  if (newTab === 'tvShows') {
+    activeSubTab.value = 'tvShows';
+  } else if (newTab === 'movies') {
+    activeSubTab.value = 'movies';
+  }
+}, { immediate: true });
+
 onMounted(() => {
   console.log('WatchlistPage mounted');
   console.log('Initial movies in watchlist:', watchlistMovies.value.length);
   console.log('Initial TV shows in watchlist:', watchlistTvShows.value.length);
+
+  // Check query parameter for initial tab
+  if (route.query.tab === 'tvShows') {
+    activeSubTab.value = 'tvShows';
+  }
 
   // Force reload watchlist data to ensure it's fresh
   if (!isLoadingMovies.value) {

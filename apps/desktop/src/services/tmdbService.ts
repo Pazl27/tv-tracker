@@ -155,3 +155,16 @@ export const getMovieDetails = async (invokeFunction: any, movieId: number) => {
     return null;
   }
 }
+
+export const getTvShowDetails = async (invokeFunction: any, showId: number) => {
+  try {
+    const result: any = await invokeFunction('get_tv_show_details', { id: showId });
+    return {
+      ...result,
+      poster_url: `https://image.tmdb.org/t/p/w500${result.poster_path}`,
+    };
+  } catch (error) {
+    console.error('Failed to fetch TV show details:', error);
+    return null;
+  }
+}

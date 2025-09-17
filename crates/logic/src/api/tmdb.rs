@@ -21,6 +21,21 @@ pub struct Tv {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+pub struct TvDetail {
+    pub id: u32,
+    pub name: String,
+    pub poster_path: String,
+    pub episode_run_time: Vec<u32>,
+    pub overview: String,
+    pub genres: Vec<String>,
+    pub vote_average: f32,
+    pub first_air_date: String,
+    pub number_of_seasons: u32,
+    pub number_of_episodes: u32,
+    pub status: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct MovieDetail {
     pub id: u32,
     pub title: String,
@@ -331,6 +346,58 @@ impl Tmdb {
             genres,
             vote_average: json["vote_average"].as_f64().unwrap_or(0.0) as f32,
             release_date: json["release_date"].as_str().unwrap_or("").to_string(),
+        })
+    }
+
+    pub async fn get_tv_show_details(&self, id: u32) -> Result<TvDetail> {
+        let client = Client::new();
+        let url = format!(
+            "{}/tv/{}?language=en-US",
+            self.url,
+            id
+        );
+
+        let response = client
+            .get(&url)
+            .header("Authorization", format!("Bearer {}", self.api_key))
+            .header("accept", "application/json")
+            .send()
+            .await
+            .context("Failed to send request")?;
+
+        let response_text = response
+            .text()
+            .await
+            .context("Failed to read response text")?;
+
+        let json: Value = serde_json::from_str(&response_text).context("Failed to parse JSON")?;
+
+        let genres = json["genres"]
+            .as_array()
+            .unwrap_or(&vec![])
+            .iter()
+            .filter_map(|genre| genre["name"].as_str().map(|s| s.to_string()))
+            .collect();
+
+        let episode_run_time = json["episode_run_time"]
+            .as_array()
+            .unwrap_or(&vec![])
+            .iter()
+            .filter_map(|runtime| runtime.as_u64().map(|r| r as u32))
+            .collect();
+
+        Ok(TvDetail {
+            id: json["id"].as_u64().unwrap_or(0) as u32,
+            name: json["name"].as_str().unwrap_or("").to_string(),
+            poster_path: json["poster_path"].as_str().unwrap_or("").to_string(),
+            episode_run_time,
+            overview: json["overview"].as_str().unwrap_or("").to_string(),
+            genres,
+            vote_average: json["vote_average"].as_f64().unwrap_or(0.0) as f32,
+            first_air_date: json["first_air_date"].as_str().unwrap_or("").to_string(),
+            number_of_seasons: json["number_of_seasons"].as_u64().unwrap_or(0) as u32,
+            number_of_episodes: json["number_of_episodes"].as_u64().unwrap_or(0) as u32,
+            status: json["status"].as_str().unwrap_or("").to_string(),
         })
     }
 }

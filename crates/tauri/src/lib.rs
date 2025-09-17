@@ -15,6 +15,7 @@ pub fn run() {
             search_movies,
             search_tv,
             get_movie_details,
+            get_tv_show_details,
             // Movie Watchlist Commands
             add_movie_to_watchlist,
             get_watchlist_movies,

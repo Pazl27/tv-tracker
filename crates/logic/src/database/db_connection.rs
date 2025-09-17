@@ -46,11 +46,28 @@ impl Sqlight {
                 "CREATE TABLE IF NOT EXISTS tv_shows_to_watch (
                     id INTEGER PRIMARY KEY,
                     name TEXT NOT NULL,
-                    poster_path TEXT NOT NULL
+                    poster_path TEXT NOT NULL,
+                    first_air_date TEXT NOT NULL DEFAULT '',
+                    vote_average REAL NOT NULL DEFAULT 0.0,
+                    overview TEXT NOT NULL DEFAULT ''
                 )",
                 [],
             )
             .expect("Failed to create tv_shows_to_watch table");
+
+            // Add migration for existing databases
+            let _ = conn.execute(
+                "ALTER TABLE tv_shows_to_watch ADD COLUMN first_air_date TEXT NOT NULL DEFAULT ''",
+                [],
+            );
+            let _ = conn.execute(
+                "ALTER TABLE tv_shows_to_watch ADD COLUMN vote_average REAL NOT NULL DEFAULT 0.0",
+                [],
+            );
+            let _ = conn.execute(
+                "ALTER TABLE tv_shows_to_watch ADD COLUMN overview TEXT NOT NULL DEFAULT ''",
+                [],
+            );
 
             conn.execute(
                 "CREATE TABLE IF NOT EXISTS watched_movies (
@@ -143,8 +160,8 @@ impl Sqlight {
 
     pub fn insert_tv_show_to_watch(&self, tv_show: &TvShowToWatch) -> Result<()> {
         self.conn.execute(
-            "INSERT OR REPLACE INTO tv_shows_to_watch (id, name, poster_path) VALUES (?1, ?2, ?3)",
-            params![tv_show.id, tv_show.name, tv_show.poster_path],
+            "INSERT OR REPLACE INTO tv_shows_to_watch (id, name, poster_path, first_air_date, vote_average, overview) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+            params![tv_show.id, tv_show.name, tv_show.poster_path, tv_show.first_air_date, tv_show.vote_average, tv_show.overview],
         )?;
         Ok(())
     }
@@ -158,12 +175,15 @@ impl Sqlight {
     pub fn get_all_tv_shows_to_watch(&self) -> Result<Vec<TvShowToWatch>> {
         let mut stmt = self
             .conn
-            .prepare("SELECT id, name, poster_path FROM tv_shows_to_watch")?;
+            .prepare("SELECT id, name, poster_path, COALESCE(first_air_date, '') as first_air_date, COALESCE(vote_average, 0.0) as vote_average, COALESCE(overview, '') as overview FROM tv_shows_to_watch")?;
         let tv_show_iter = stmt.query_map([], |row| {
             Ok(TvShowToWatch {
                 id: row.get(0)?,
                 name: row.get(1)?,
                 poster_path: row.get(2)?,
+                first_air_date: row.get(3)?,
+                vote_average: row.get(4)?,
+                overview: row.get(5)?,
             })
         })?;
 

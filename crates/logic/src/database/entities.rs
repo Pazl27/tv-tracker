@@ -12,6 +12,9 @@ pub struct TvShowToWatch {
     pub id: i32,
     pub name: String,
     pub poster_path: String,
+    pub first_air_date: String,
+    pub vote_average: f32,
+    pub overview: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

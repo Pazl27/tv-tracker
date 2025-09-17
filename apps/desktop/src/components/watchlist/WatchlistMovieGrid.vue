@@ -121,6 +121,10 @@ const removeFromWatchlist = async (movie: any) => {
 
 const goToMovieDetails = (movie: any) => {
   localStorage.setItem('selectedMovie', JSON.stringify(movie));
+  localStorage.setItem('movieNavigationContext', JSON.stringify({
+    from: 'watchlist',
+    tab: 'movies'
+  }));
   router.push({
     name: 'MovieDetails',
     params: { id: movie.id }

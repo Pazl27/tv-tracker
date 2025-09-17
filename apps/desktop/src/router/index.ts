@@ -3,6 +3,7 @@ import HomePage from '../views/HomePage.vue';
 import PopularPage from '../views/PopularPage.vue';
 import WatchlistPage from '../views/WatchlistPage.vue';
 import MovieDetailsPage from '../views/MovieDetailsPage.vue';
+import TvShowDetailsPage from '../views/TvShowDetailsPage.vue';
 
 const routes = [
   {
@@ -24,6 +25,12 @@ const routes = [
     path: '/movie/:id',
     name: 'MovieDetails',
     component: MovieDetailsPage,
+    props: true
+  },
+  {
+    path: '/tv/:id',
+    name: 'TvShowDetails',
+    component: TvShowDetailsPage,
     props: true
   }
 ];

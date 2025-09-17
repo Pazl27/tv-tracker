@@ -7,13 +7,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { invoke } from "@tauri-apps/api/core";
+import { useRoute, useRouter } from 'vue-router';
 import MovieGrid from '../components/popular/MovieGrid.vue';
 import TvShowGrid from '../components/popular/TvShowGrid.vue';
 import TabBar from '../components/TabBar.vue';
 import { searchMovies, searchShows } from '../services/tmdbService';
 
+const route = useRoute();
+const router = useRouter();
 const activeTab = ref('popular');
 const activeSubTab = ref('movies');
 const movieGridKey = ref(0);
@@ -27,6 +30,12 @@ const switchTab = (tab: string) => {
 
 const switchSubTab = (subTab: string) => {
   activeSubTab.value = subTab;
+
+  // Update URL query parameter to preserve tab state
+  router.replace({
+    path: '/popular',
+    query: { tab: subTab }
+  });
   
   // Load TV shows when switching to TV tab if not already loaded
   if (subTab === 'tvShows' && tvShows.value.length === 0 && !searchQuery.value) {
@@ -69,4 +78,24 @@ const searchTvShowsHandler = async (query: string) => {
     console.error('Failed to search TV shows:', error);
   }
 };
+
+// Watch for route query changes to set the correct tab
+watch(() => route.query.tab, (newTab) => {
+  if (newTab === 'tvShows') {
+    activeSubTab.value = 'tvShows';
+  } else if (newTab === 'movies') {
+    activeSubTab.value = 'movies';
+  }
+}, { immediate: true });
+
+onMounted(() => {
+  // Check query parameter for initial tab
+  if (route.query.tab === 'tvShows') {
+    activeSubTab.value = 'tvShows';
+    // Load TV shows if coming from navigation with tvShows tab
+    if (tvShows.value.length === 0) {
+      loadTvShows();
+    }
+  }
+});
 </script>

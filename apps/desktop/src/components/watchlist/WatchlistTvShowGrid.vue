@@ -86,10 +86,12 @@ import { defineProps } from 'vue';
 import { fetchShowWatchlist } from '../../services/tmdbService';
 import { useWatchlistStore } from '../../stores/watchlistStore';
 import { useToast } from '../../composables/useToast';
+import { useRouter } from 'vue-router';
 import LazyImage from '../LazyImage.vue';
 
 const props = defineProps<{ searchQuery: string }>();
 
+const router = useRouter();
 const { watchlistTvShows, isLoadingTvShows, removeTvShowFromWatchlist } = useWatchlistStore();
 const { success, error } = useToast();
 
@@ -117,8 +119,15 @@ const removeFromWatchlist = async (show: any) => {
 };
 
 const goToShowDetails = (show: any) => {
-  // TODO: Implement TV show details page
-  console.log('Go to show details:', show);
+  localStorage.setItem('selectedTvShow', JSON.stringify(show));
+  localStorage.setItem('tvShowNavigationContext', JSON.stringify({
+    from: 'watchlist',
+    tab: 'tvShows'
+  }));
+  router.push({
+    name: 'TvShowDetails',
+    params: { id: show.id }
+  });
 };
 
 const filteredTvShows = computed(() => {
