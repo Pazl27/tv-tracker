@@ -318,7 +318,6 @@ If you encounter any issues or have questions:
 
 1. Check the [Issues](https://github.com/yourusername/tv-tracker/issues) page
 2. Create a new issue with detailed information
-3. Join our [Discord community](https://discord.gg/yourdiscord) for real-time help
 
 ---
 
