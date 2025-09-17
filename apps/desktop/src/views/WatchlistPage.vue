@@ -44,7 +44,6 @@ const {
 } = useWatchlistStore();
 
 const handleSubTabSwitched = (subTab: string) => {
-  console.log('Switching to tab:', subTab);
   activeSubTab.value = subTab;
 
   // Update URL query parameter to preserve tab state
@@ -55,13 +54,11 @@ const handleSubTabSwitched = (subTab: string) => {
 
   // Load data when switching to TV shows if not loaded yet
   if (subTab === 'tvShows' && watchlistTvShows.value.length === 0 && !isLoadingTvShows.value) {
-    console.log('Loading TV shows for watchlist tab...');
     loadWatchlistTvShows();
   }
 };
 
 const handleSearchInput = (query: string) => {
-  console.log('Search input:', query, 'for tab:', activeSubTab.value);
   searchQuery.value = query;
 
   // Note: Search within watchlist is handled by the individual components
@@ -78,7 +75,6 @@ const searchMoviesHandler = async (query: string) => {
   try {
     // This searches all movies, not just watchlist
     // The component will filter the watchlist based on searchQuery
-    console.log('Searching movies globally:', query);
   } catch (error) {
     console.error('Failed to search movies:', error);
   }
@@ -88,7 +84,6 @@ const searchTvShowsHandler = async (query: string) => {
   try {
     // This searches all TV shows, not just watchlist
     // The component will filter the watchlist based on searchQuery
-    console.log('Searching TV shows globally:', query);
   } catch (error) {
     console.error('Failed to search TV shows:', error);
   }
@@ -104,9 +99,6 @@ watch(() => route.query.tab, (newTab) => {
 }, { immediate: true });
 
 onMounted(() => {
-  console.log('WatchlistPage mounted');
-  console.log('Initial movies in watchlist:', watchlistMovies.value.length);
-  console.log('Initial TV shows in watchlist:', watchlistTvShows.value.length);
 
   // Check query parameter for initial tab
   if (route.query.tab === 'tvShows') {

@@ -29,7 +29,6 @@ export const fetchMovies = async (invokeFunction: any) => {
   // Check if movies are cached
   const cachedMovies = getFromCache(MOVIES_CACHE_KEY);
   if (cachedMovies) {
-    console.log('Using cached movies');
     return cachedMovies;
   }
 
@@ -45,7 +44,6 @@ export const fetchMovies = async (invokeFunction: any) => {
     // Cache the movies
     setToCache(MOVIES_CACHE_KEY, movies);
     const endTime = performance.now();
-    console.log(`Fetched and cached ${movies.length} movies in ${endTime - startTime}ms`);
     return movies;
   } catch (error) {
     console.error('Failed to fetch trending movies:', error);
@@ -57,7 +55,6 @@ export const fetchTvShows = async (invokeFunction: any) => {
   // Check if TV shows are cached
   const cachedTvShows = getFromCache(TV_SHOWS_CACHE_KEY);
   if (cachedTvShows) {
-    console.log('Using cached TV shows');
     return cachedTvShows;
   }
 
@@ -73,7 +70,6 @@ export const fetchTvShows = async (invokeFunction: any) => {
     // Cache the TV shows
     setToCache(TV_SHOWS_CACHE_KEY, tvShows);
     const endTime = performance.now();
-    console.log(`Fetched and cached ${tvShows.length} TV shows in ${endTime - startTime}ms`);
     return tvShows;
   } catch (error) {
     console.error('Failed to fetch trending TV shows:', error);
@@ -129,8 +125,6 @@ export const fetchShowWatchlist = async (invokeFunction: any) => {
 
   try {
     const result: any[] = await invokeFunction('get_watchlist_shows');
-    console.log("hllelelelelel")
-    console.log(result)
     const shows = result.map((show: any) => ({
       ...show,
       poster_url: `https://image.tmdb.org/t/p/w500${show.poster_path}`,

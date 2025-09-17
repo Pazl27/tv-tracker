@@ -14,7 +14,7 @@
           <p class="page-subtitle">Your rated movies and TV shows</p>
         </div>
       </div>
-      
+
       <!-- Search Bar -->
       <div class="search-container">
         <div class="search-bar">
@@ -31,8 +31,8 @@
             @keydown.enter="focusFirstResult"
             class="search-input"
           />
-          <button 
-            v-if="searchQuery" 
+          <button
+            v-if="searchQuery"
             @click="clearSearch"
             class="clear-button"
             type="button"
@@ -43,20 +43,20 @@
           </button>
         </div>
       </div>
-      
+
       <!-- Quick Filters - Always visible -->
       <div class="quick-filters">
         <div class="filter-group">
           <span class="filter-label">Filter by Rating:</span>
-          <button 
-            v-for="rating in [5, 4, 3, 2, 1]" 
+          <button
+            v-for="rating in [5, 4, 3, 2, 1]"
             :key="rating"
             @click="toggleRatingFilter(rating)"
             :class="['filter-btn', { active: ratingFilters.includes(rating) }]"
           >
             {{ rating }}+ ⭐
           </button>
-          <button 
+          <button
             v-if="ratingFilters.length > 0"
             @click="clearRatingFilters"
             class="filter-btn clear"
@@ -82,8 +82,8 @@
 
     <!-- Tabs -->
     <div class="content-tabs">
-      <button 
-        class="tab-button" 
+      <button
+        class="tab-button"
         :class="{ active: activeTab === 'movies' }"
         @click="activeTab = 'movies'"
       >
@@ -94,8 +94,8 @@
         Movies
         <span class="tab-count">({{ searchQuery ? filteredMovies.length : ratedMovies.length }})</span>
       </button>
-      <button 
-        class="tab-button" 
+      <button
+        class="tab-button"
         :class="{ active: activeTab === 'tvShows' }"
         @click="activeTab = 'tvShows'"
       >
@@ -136,14 +136,14 @@
       </div>
 
       <div v-else class="content-items">
-        <div 
-          v-for="movie in filteredMovies" 
-          :key="movie.id" 
+        <div
+          v-for="movie in filteredMovies"
+          :key="movie.id"
           class="content-item"
           @click="navigateToMovie(movie.id)"
         >
-          <img 
-            :src="`https://image.tmdb.org/t/p/w200${movie.poster_path}`" 
+          <img
+            :src="`https://image.tmdb.org/t/p/w200${movie.poster_path}`"
             :alt="movie.title"
             class="content-poster"
             @error="handleImageError"
@@ -207,14 +207,14 @@
       </div>
 
       <div v-else class="content-items">
-        <div 
-          v-for="show in filteredTvShows" 
-          :key="show.id" 
+        <div
+          v-for="show in filteredTvShows"
+          :key="show.id"
           class="content-item"
           @click="navigateToTvShow(show.id)"
         >
-          <img 
-            :src="`https://image.tmdb.org/t/p/w200${show.poster_path}`" 
+          <img
+            :src="`https://image.tmdb.org/t/p/w200${show.poster_path}`"
             :alt="show.name"
             class="content-poster"
             @error="handleImageError"
@@ -279,10 +279,10 @@ import RatingPopup from '../components/RatingPopup.vue'
 import { formatWatchedDate } from '../utils/dateUtils'
 
 const router = useRouter()
-const { 
-  ratedMovies, 
-  ratedTvShows, 
-  isLoadingMovieRatings, 
+const {
+  ratedMovies,
+  ratedTvShows,
+  isLoadingMovieRatings,
   isLoadingTvShowRatings,
   loadAllRatedMovies,
   loadAllRatedTvShows,
@@ -309,43 +309,43 @@ const isLoading = computed(() => {
 
 const filteredMovies = computed(() => {
   let filtered = ratedMovies.value
-  
+
   // Apply search filter
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(movie => 
+    filtered = filtered.filter(movie =>
       movie.title.toLowerCase().includes(query)
     )
   }
-  
+
   // Apply rating filters
   if (ratingFilters.value.length > 0) {
-    filtered = filtered.filter(movie => 
+    filtered = filtered.filter(movie =>
       ratingFilters.value.some(rating => movie.rating >= rating)
     )
   }
-  
+
   return filtered
 })
 
 const filteredTvShows = computed(() => {
   let filtered = ratedTvShows.value
-  
+
   // Apply search filter
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(show => 
+    filtered = filtered.filter(show =>
       show.name.toLowerCase().includes(query)
     )
   }
-  
+
   // Apply rating filters
   if (ratingFilters.value.length > 0) {
-    filtered = filtered.filter(show => 
+    filtered = filtered.filter(show =>
       ratingFilters.value.some(rating => show.rating >= rating)
     )
   }
-  
+
   return filtered
 })
 
@@ -372,7 +372,7 @@ const clearSearch = () => {
 
 const highlightSearchTerm = (text: string) => {
   if (!searchQuery.value) return text
-  
+
   const regex = new RegExp(`(${searchQuery.value})`, 'gi')
   return text.replace(regex, '<mark class="search-highlight">$1</mark>')
 }
@@ -460,9 +460,9 @@ const handleRatingSave = async (data: { rating: number; watchedAt: string }) => 
       await rateTvShow(selectedContent.value, data.rating, data.watchedAt)
       success('Rating Updated', `Updated rating for ${selectedContent.value.name}`)
     }
-    
+
     closeRatingPopup()
-    
+
     // Reload the data
     await loadAllRatedMovies()
     await loadAllRatedTvShows()
@@ -474,7 +474,7 @@ const handleRatingSave = async (data: { rating: number; watchedAt: string }) => 
 
 const removeRating = async (contentId: number, type: 'movie' | 'tvShow') => {
   if (!confirm('Are you sure you want to remove this rating?')) return
-  
+
   try {
     if (type === 'movie') {
       await removeMovieRating(contentId)
@@ -483,7 +483,7 @@ const removeRating = async (contentId: number, type: 'movie' | 'tvShow') => {
       await removeTvShowRating(contentId)
       success('Rating Removed', 'TV show rating has been removed')
     }
-    
+
     // Reload the data
     await loadAllRatedMovies()
     await loadAllRatedTvShows()
@@ -503,7 +503,7 @@ onMounted(async () => {
     console.error('Failed to load watched content:', err)
     error('Load Failed', 'Failed to load your watched content. Please try again.')
   }
-  
+
   // Add keyboard event listeners
   document.addEventListener('keydown', handleKeydown)
 })
@@ -576,6 +576,7 @@ onUnmounted(() => {
 .search-container {
   max-width: 600px;
   margin: 0 auto;
+  margin-bottom: var(--spacing-md);
 }
 
 .search-bar {
@@ -942,86 +943,86 @@ onUnmounted(() => {
   .watched-page {
     padding: var(--spacing-md);
   }
-  
+
   .header-top {
     flex-direction: column;
     align-items: stretch;
     text-align: center;
   }
-  
+
   .back-button {
     align-self: flex-start;
   }
-  
+
   .page-title {
     font-size: 2rem;
   }
-  
+
   .search-input {
     padding: var(--spacing-sm) var(--spacing-xl) var(--spacing-sm) 40px;
     font-size: 0.875rem;
   }
-  
+
   .search-icon {
     left: var(--spacing-sm);
     width: 18px;
     height: 18px;
   }
-  
+
   .clear-button {
     right: var(--spacing-sm);
   }
-  
+
   .quick-filters {
     padding: var(--spacing-md);
     margin-bottom: var(--spacing-md);
   }
-  
+
   .filter-group {
     flex-direction: column;
     align-items: stretch;
     gap: var(--spacing-md);
   }
-  
+
   .filter-label {
     text-align: center;
     margin-right: 0;
     margin-bottom: var(--spacing-xs);
   }
-  
+
   .filter-btn {
     flex: 1;
     min-width: 0;
     text-align: center;
   }
-  
+
   .content-tabs {
     flex-direction: column;
     align-items: center;
   }
-  
+
   .tab-button {
     width: 100%;
     max-width: 300px;
     justify-content: center;
   }
-  
+
   .content-item {
     flex-direction: column;
     align-items: center;
     text-align: center;
   }
-  
+
   .content-actions {
     opacity: 1;
     margin-top: var(--spacing-sm);
   }
-  
+
   .content-poster {
     width: 120px;
     height: 180px;
   }
-  
+
   .content-meta {
     align-items: center;
   }
@@ -1031,12 +1032,12 @@ onUnmounted(() => {
   .content-item {
     padding: var(--spacing-md);
   }
-  
+
   .content-poster {
     width: 100px;
     height: 150px;
   }
-  
+
   .content-title {
     font-size: 1.125rem;
   }

@@ -19,20 +19,20 @@ export function formatWatchedDate(dateString: string): string {
   try {
     const date = new Date(dateString)
     const now = new Date()
-    
+
     // Reset time to compare only dates
     const dateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate())
     const nowOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-    
+
     const diffTime = nowOnly.getTime() - dateOnly.getTime()
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
-    
+
     if (diffDays === 0) return 'Today'
     if (diffDays === 1) return 'Yesterday'
     if (diffDays <= 7) return `${diffDays} days ago`
     if (diffDays <= 30) return `${Math.ceil(diffDays / 7)} weeks ago`
     if (diffDays <= 365) return `${Math.ceil(diffDays / 30)} months ago`
-    
+
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -98,23 +98,9 @@ export function isYesterday(dateString: string): boolean {
  * Test function to verify date logic
  */
 export function testDateLogic(): void {
-  console.log('=== Date Utils Test ===')
-  
+
   const today = getTodayString()
   const yesterday = getYesterdayString()
   const weekAgo = getDaysAgoString(7)
-  
-  console.log('Today:', today)
-  console.log('Yesterday:', yesterday)
-  console.log('Week ago:', weekAgo)
-  
-  console.log('Today formatted:', formatWatchedDate(today))
-  console.log('Yesterday formatted:', formatWatchedDate(yesterday))
-  console.log('Week ago formatted:', formatWatchedDate(weekAgo))
-  
-  console.log('Is today today?', isToday(today))
-  console.log('Is yesterday today?', isToday(yesterday))
-  console.log('Is yesterday yesterday?', isYesterday(yesterday))
-  
-  console.log('=== End Test ===')
+
 }

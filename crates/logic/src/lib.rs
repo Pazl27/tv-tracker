@@ -14,6 +14,5 @@ mod tests {
         let db = conn.lock().unwrap();
 
         let movies = db.get_all_movies_to_watch().unwrap();
-        println!("{:?}", movies);
     }
 }

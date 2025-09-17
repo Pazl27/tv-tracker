@@ -411,7 +411,5 @@ mod test {
         let tmdb = Tmdb::new(TmdbConfig::default());
 
         let movies = tmdb.get_movie_details(123).await.unwrap();
-
-        println!("{:?}", movies);
     }
 }

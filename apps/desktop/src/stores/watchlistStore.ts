@@ -32,11 +32,11 @@ const isLoadingTvShows = ref(false)
 
 export const useWatchlistStore = () => {
   // Computed properties
-  const watchlistMovieIds = computed(() => 
+  const watchlistMovieIds = computed(() =>
     new Set(watchlistMovies.value.map(movie => movie.id))
   )
-  
-  const watchlistTvShowIds = computed(() => 
+
+  const watchlistTvShowIds = computed(() =>
     new Set(watchlistTvShows.value.map(show => show.id))
   )
 
@@ -51,7 +51,7 @@ export const useWatchlistStore = () => {
   // Load watchlist data
   const loadWatchlistMovies = async () => {
     if (isLoadingMovies.value) return
-    
+
     isLoadingMovies.value = true
     try {
       const result: any[] = await invoke('get_watchlist_movies')
@@ -69,20 +69,16 @@ export const useWatchlistStore = () => {
 
   const loadWatchlistTvShows = async () => {
     if (isLoadingTvShows.value) return
-    
+
     isLoadingTvShows.value = true
     try {
-      console.log('Loading watchlist TV shows...')
       const result: any[] = await invoke('get_watchlist_shows')
-      console.log('Raw TV shows from backend:', result)
-      
+
       watchlistTvShows.value = result.map((show: any) => ({
         ...show,
         poster_url: `https://image.tmdb.org/t/p/w500${show.poster_path}`,
       }))
-      
-      console.log('Processed TV shows for store:', watchlistTvShows.value)
-      console.log('Total TV shows in watchlist:', watchlistTvShows.value.length)
+
     } catch (error) {
       console.error('Failed to load watchlist TV shows:', error)
       throw error
@@ -95,7 +91,7 @@ export const useWatchlistStore = () => {
   const addMovieToWatchlist = async (movie: Movie) => {
     try {
       await invoke('add_movie_to_watchlist', { movie })
-      
+
       // Add to local state if not already present
       if (!isMovieInWatchlist(movie.id)) {
         const movieWithPosterUrl = {
@@ -104,7 +100,7 @@ export const useWatchlistStore = () => {
         }
         watchlistMovies.value.push(movieWithPosterUrl)
       }
-      
+
       return true
     } catch (error) {
       console.error('Failed to add movie to watchlist:', error)
@@ -114,10 +110,8 @@ export const useWatchlistStore = () => {
 
   const addTvShowToWatchlist = async (show: TvShow) => {
     try {
-      console.log('Adding TV show to watchlist:', show)
       await invoke('add_show_to_watchlist', { show })
-      console.log('Successfully added TV show to backend')
-      
+
       // Add to local state if not already present
       if (!isTvShowInWatchlist(show.id)) {
         const showWithPosterUrl = {
@@ -125,11 +119,9 @@ export const useWatchlistStore = () => {
           poster_url: `https://image.tmdb.org/t/p/w500${show.poster_path}`,
         }
         watchlistTvShows.value.push(showWithPosterUrl)
-        console.log('Added TV show to local state. Total shows:', watchlistTvShows.value.length)
       } else {
-        console.log('TV show already in watchlist')
       }
-      
+
       return true
     } catch (error) {
       console.error('Failed to add TV show to watchlist:', error)
@@ -142,13 +134,13 @@ export const useWatchlistStore = () => {
   const removeMovieFromWatchlist = async (movie: Movie) => {
     try {
       await invoke('remove_movie_from_watchlist', { movie })
-      
+
       // Remove from local state
       const index = watchlistMovies.value.findIndex(m => m.id === movie.id)
       if (index > -1) {
         watchlistMovies.value.splice(index, 1)
       }
-      
+
       return true
     } catch (error) {
       console.error('Failed to remove movie from watchlist:', error)
@@ -158,19 +150,15 @@ export const useWatchlistStore = () => {
 
   const removeTvShowFromWatchlist = async (show: TvShow) => {
     try {
-      console.log('Removing TV show from watchlist:', show)
       await invoke('remove_show_from_watchlist', { show })
-      console.log('Successfully removed TV show from backend')
-      
+
       // Remove from local state
       const index = watchlistTvShows.value.findIndex(s => s.id === show.id)
       if (index > -1) {
         watchlistTvShows.value.splice(index, 1)
-        console.log('Removed TV show from local state. Remaining shows:', watchlistTvShows.value.length)
       } else {
-        console.log('TV show not found in local state')
       }
-      
+
       return true
     } catch (error) {
       console.error('Failed to remove TV show from watchlist:', error)
@@ -190,7 +178,7 @@ export const useWatchlistStore = () => {
     try {
       // Load movies first (more commonly accessed)
       await loadWatchlistMovies()
-      
+
       // Load TV shows after a small delay to prevent blocking
       setTimeout(() => {
         loadWatchlistTvShows()
@@ -206,13 +194,13 @@ export const useWatchlistStore = () => {
     watchlistTvShows,
     isLoadingMovies,
     isLoadingTvShows,
-    
+
     // Computed
     watchlistMovieIds,
     watchlistTvShowIds,
     isMovieInWatchlist,
     isTvShowInWatchlist,
-    
+
     // Actions
     loadWatchlistMovies,
     loadWatchlistTvShows,

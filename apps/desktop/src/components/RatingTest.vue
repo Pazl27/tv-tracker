@@ -1,7 +1,7 @@
 <template>
   <div class="rating-test">
     <h2>Star Rating Test Component</h2>
-    
+
     <div class="test-section">
       <h3>Interactive Rating</h3>
       <p>Current rating: {{ testRating }}</p>
@@ -115,7 +115,6 @@ const lastAction = ref('None')
 const ratingHistory = ref<number[]>([])
 
 const onRatingChange = (rating: number) => {
-  console.log('Rating changed to:', rating)
   lastAction.value = `Rated ${rating} stars`
   ratingHistory.value.push(rating)
   if (ratingHistory.value.length > 5) {
@@ -124,7 +123,6 @@ const onRatingChange = (rating: number) => {
 }
 
 const onRatingClear = () => {
-  console.log('Rating cleared')
   lastAction.value = 'Rating cleared'
   ratingHistory.value.push(0)
   if (ratingHistory.value.length > 5) {
@@ -232,26 +230,26 @@ const setRating = (rating: number) => {
   .rating-test h2 {
     color: #f9fafb;
   }
-  
+
   .test-section {
     background: #1f2937;
     border-color: #374151;
   }
-  
+
   .test-section h3 {
     color: #f3f4f6;
   }
-  
+
   .example span,
   .size-example span {
     color: #d1d5db;
   }
-  
+
   .debug-info {
     background: #1e3a8a;
     border-color: #3b82f6;
   }
-  
+
   .debug-info h3,
   .debug-info p {
     color: #bfdbfe;

@@ -36,7 +36,7 @@ const switchSubTab = (subTab: string) => {
     path: '/popular',
     query: { tab: subTab }
   });
-  
+
   // Load TV shows when switching to TV tab if not already loaded
   if (subTab === 'tvShows' && tvShows.value.length === 0 && !searchQuery.value) {
     loadTvShows();
@@ -73,7 +73,6 @@ const searchMoviesHandler = async (query: string) => {
 const searchTvShowsHandler = async (query: string) => {
   try {
     tvShows.value = await searchShows(invoke, query);
-    console.log(tvShows.value);
   } catch (error) {
     console.error('Failed to search TV shows:', error);
   }

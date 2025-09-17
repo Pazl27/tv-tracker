@@ -13,9 +13,9 @@
 
     <!-- TV Show Cards -->
     <div v-else class="tvshow-grid">
-      <div 
-        v-for="show in tvShows" 
-        :key="show.id" 
+      <div
+        v-for="show in tvShows"
+        :key="show.id"
         class="tvshow-card"
         @click="goToShowDetails(show)"
       >
@@ -33,8 +33,8 @@
             @visible="onImageVisible"
           />
           <div class="tvshow-overlay">
-            <button 
-              class="action-button add-button" 
+            <button
+              class="action-button add-button"
               @click.stop="toggleWatchlist(show)"
               :title="isTvShowInWatchlist(show.id) ? 'Remove from Watchlist' : 'Add to Watchlist'"
               :class="{ 'in-watchlist': isTvShowInWatchlist(show.id) }"
@@ -61,7 +61,7 @@
             <span>TV</span>
           </div>
         </div>
-        
+
         <div class="tvshow-content">
           <h3 class="tvshow-title">{{ show.name }}</h3>
           <p class="tvshow-year" v-if="show.first_air_date">
@@ -118,7 +118,6 @@ const onImageVisible = () => {
 const loadTvShows = async () => {
   try {
     tvShows.value = await fetchTvShows(invoke);
-    console.log(tvShows.value.length);
   } catch (error) {
     console.error('Failed to load TV shows:', error);
   } finally {
@@ -434,7 +433,7 @@ watch(() => props.searchedTvShows, (newTvShows) => {
     grid-template-columns: repeat(3, 1fr);
     gap: var(--spacing-md);
   }
-  
+
   .tvshow-grid-container {
     padding: var(--spacing-md);
   }
@@ -445,28 +444,28 @@ watch(() => props.searchedTvShows, (newTvShows) => {
     grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-sm);
   }
-  
+
   .tvshow-grid-container {
     padding: var(--spacing-sm);
   }
-  
+
   .tvshow-content {
     padding: var(--spacing-sm);
   }
-  
+
   .tvshow-title {
     font-size: 0.875rem;
   }
-  
+
   .tvshow-year {
     font-size: 0.75rem;
   }
-  
+
   .action-button {
     width: 36px;
     height: 36px;
   }
-  
+
   .action-button svg {
     width: 16px;
     height: 16px;
