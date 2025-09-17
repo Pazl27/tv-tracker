@@ -29,7 +29,7 @@ graph TB
     
     subgraph "Frontend (Vue.js)"
         F[Components]
-        G[Stores (Pinia-like)]
+        G["Stores (Pinia-like)"]
         H[Router]
         I[Services]
     end
