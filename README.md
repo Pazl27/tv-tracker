@@ -72,7 +72,7 @@ Before you begin, ensure you have the following installed:
 
 - **Node.js** (v18 or higher)
 - **pnpm** (v8 or higher)
-- **Rust** (latest stable)
+- **Rust** (nightly-2025-02-14 or compatible)
 - **Tauri CLI** (v2.x)
 
 ### Installation
@@ -97,7 +97,10 @@ Before you begin, ensure you have the following installed:
    ```bash
    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
    source ~/.cargo/env
+   rustup toolchain install nightly-2025-02-14
    ```
+   
+   > **Note**: This project uses a specific Rust nightly version defined in `rust-toolchain.toml`. The toolchain will be automatically selected when you work in the project directory.
 
 5. **Install Tauri CLI**
    ```bash
