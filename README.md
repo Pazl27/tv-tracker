@@ -26,26 +26,26 @@ graph TB
     B --> C[Rust Backend]
     C --> D[SQLite Database]
     C --> E[TMDB API]
-    
+
     subgraph "Frontend (Vue.js)"
         F[Components]
         G["Stores (Pinia-like)"]
         H[Router]
         I[Services]
     end
-    
+
     subgraph "Backend (Rust)"
         J[Tauri Commands]
         K[Logic Crate]
         L[Database Layer]
         M[API Client]
     end
-    
+
     A --> F
     A --> G
     A --> H
     A --> I
-    
+
     C --> J
     C --> K
     C --> L
@@ -99,7 +99,7 @@ Before you begin, ensure you have the following installed:
    source ~/.cargo/env
    rustup toolchain install nightly-2025-02-14
    ```
-   
+
    > **Note**: This project uses a specific Rust nightly version defined in `rust-toolchain.toml`. The toolchain will be automatically selected when you work in the project directory.
 
 5. **Install Tauri CLI**
@@ -124,14 +124,14 @@ The application uses The Movie Database (TMDB) API to fetch movie and TV show da
    - Copy your API Read Access Token (v4 auth)
 
 3. **Configure the API key**
-   
+
    The application will create a config file automatically. You can add your API key in two ways:
-   
+
    **Option 1: Through the app** (Recommended)
    - Run the application
    - When prompted, enter your TMDB API key
    - The app will validate and save it automatically
-   
+
    **Option 2: Manual configuration**
    - Create the config directory:
      ```bash
@@ -238,7 +238,7 @@ tv-tracker/
 | Command | Description |
 |---------|-------------|
 | `pnpm desktop:dev` | Start development server |
-| `pnpm tauri build` | Build for production |
+| `pnpm desktop:build` | Build for production |
 | `pnpm tauri dev` | Alternative dev command |
 | `pnpm prettier:desktop` | Check code formatting |
 | `pnpm format:desktop` | Format code |
