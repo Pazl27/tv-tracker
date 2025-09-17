@@ -1,4 +1,5 @@
 use logic::{api, database};
+use chrono;
 
 // API Commands
 
@@ -195,7 +196,7 @@ pub async fn remove_show_from_watchlist(show: serde_json::Value) -> Result<(), S
 // Rating Commands
 
 #[tauri::command]
-pub async fn rate_movie(movie: serde_json::Value, rating: f32) -> Result<(), String> {
+pub async fn rate_movie(movie: serde_json::Value, rating: f32, watched_at: Option<String>) -> Result<(), String> {
     if rating < 0.5 || rating > 5.0 || (rating * 2.0).fract() != 0.0 {
         return Err("Rating must be between 0.5 and 5.0 in 0.5 increments".to_string());
     }
@@ -208,6 +209,7 @@ pub async fn rate_movie(movie: serde_json::Value, rating: f32) -> Result<(), Str
         title: movie["title"].as_str().unwrap_or("").to_string(),
         poster_path: movie["poster_path"].as_str().unwrap_or("").to_string(),
         rating,
+        watched_at: watched_at.unwrap_or_else(|| chrono::Utc::now().to_rfc3339()),
     };
     
     db.rate_movie(&watched_movie).map_err(|e| e.to_string())?;
@@ -215,7 +217,7 @@ pub async fn rate_movie(movie: serde_json::Value, rating: f32) -> Result<(), Str
 }
 
 #[tauri::command]
-pub async fn rate_tv_show(show: serde_json::Value, rating: f32) -> Result<(), String> {
+pub async fn rate_tv_show(show: serde_json::Value, rating: f32, watched_at: Option<String>) -> Result<(), String> {
     if rating < 0.5 || rating > 5.0 || (rating * 2.0).fract() != 0.0 {
         return Err("Rating must be between 0.5 and 5.0 in 0.5 increments".to_string());
     }
@@ -231,6 +233,7 @@ pub async fn rate_tv_show(show: serde_json::Value, rating: f32) -> Result<(), St
         vote_average: show["vote_average"].as_f64().unwrap_or(0.0) as f32,
         overview: show["overview"].as_str().unwrap_or("").to_string(),
         rating,
+        watched_at: watched_at.unwrap_or_else(|| chrono::Utc::now().to_rfc3339()),
     };
     
     db.rate_tv_show(&watched_tv_show).map_err(|e| e.to_string())?;

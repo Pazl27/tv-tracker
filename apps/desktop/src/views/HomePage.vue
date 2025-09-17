@@ -32,6 +32,13 @@
             </svg>
             My Watchlist
           </router-link>
+          
+          <router-link to="/watched" class="cta-button tertiary">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
+            </svg>
+            Watched
+          </router-link>
         </div>
       </div>
       
@@ -167,7 +174,24 @@
             </div>
             <div class="quick-action-content">
               <h3>My Watchlist</h3>
-              <p>Continue where you left off</p>
+              <p>View and manage your saved content</p>
+            </div>
+            <div class="quick-action-arrow">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </router-link>
+          
+          <router-link to="/watched" class="quick-action-card">
+            <div class="quick-action-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
+              </svg>
+            </div>
+            <div class="quick-action-content">
+              <h3>Watched Content</h3>
+              <p>Your rated movies and TV shows</p>
             </div>
             <div class="quick-action-arrow">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -306,6 +330,19 @@
   background: var(--color-surface);
   border-color: var(--color-accent-secondary);
   color: var(--color-accent-secondary);
+  transform: translateY(-2px);
+}
+
+.cta-button.tertiary {
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  border-color: var(--color-border);
+}
+
+.cta-button.tertiary:hover {
+  background: var(--color-background);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
   transform: translateY(-2px);
 }
 

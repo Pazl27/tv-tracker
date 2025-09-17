@@ -99,14 +99,39 @@
           <!-- Rating Section -->
           <div class="rating-section">
             <h3 class="section-title">Your Rating</h3>
-            <StarRating
-              v-model="currentRating"
-              @change="handleRatingChange"
-              @clear="handleRatingClear"
-              :show-rating-text="true"
-              :show-clear-button="true"
-              size="large"
-            />
+            <div v-if="currentRating > 0" class="current-rating">
+              <StarRating
+                :model-value="currentRating"
+                :readonly="true"
+                :show-rating-text="true"
+                :show-clear-button="false"
+                size="medium"
+              />
+              <div class="rating-actions">
+                <button @click="openRatingPopup" class="rating-btn edit">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M18.5 2.5C18.8978 2.10217 19.4374 1.87868 20 1.87868C20.5626 1.87868 21.1022 2.10217 21.5 2.5C21.8978 2.89783 22.1213 3.43739 22.1213 4C22.1213 4.56261 21.8978 5.10217 21.5 5.5L12 15L8 16L9 12L18.5 2.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  Edit Rating
+                </button>
+                <button @click="handleRatingClear" class="rating-btn remove">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  Remove
+                </button>
+              </div>
+            </div>
+            <div v-else class="no-rating">
+              <p>You haven't rated this movie yet</p>
+              <button @click="openRatingPopup" class="rating-btn primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
+                </svg>
+                Rate This Movie
+              </button>
+            </div>
           </div>
 
           <!-- Overview -->
@@ -149,6 +174,17 @@
         <button @click="goBack" class="btn-primary">Go Back</button>
       </div>
     </div>
+
+    <!-- Rating Popup -->
+    <RatingPopup
+      :is-visible="showRatingPopup"
+      :content="movie"
+      content-type="Movie"
+      :existing-rating="currentRating"
+      :existing-watched-at="existingWatchedAt"
+      @close="closeRatingPopup"
+      @save="handleRatingSave"
+    />
   </div>
 </template>
 
@@ -161,10 +197,13 @@ import { useWatchlistStore } from '../stores/watchlistStore';
 import { useRatingStore } from '../stores/ratingStore';
 import { useToast } from '../composables/useToast';
 import StarRating from '../components/StarRating.vue';
+import RatingPopup from '../components/RatingPopup.vue';
 
 const movie = ref<any>(null);
 const loading = ref(true);
 const currentRating = ref(0);
+const showRatingPopup = ref(false);
+const existingWatchedAt = ref('');
 const route = useRoute();
 const router = useRouter();
 const { isMovieInWatchlist, addMovieToWatchlist, removeMovieFromWatchlist } = useWatchlistStore();
@@ -267,18 +306,26 @@ const formatRuntime = (minutes: number) => {
   return `${hours}h ${mins}m`;
 };
 
-const handleRatingChange = async (rating: number) => {
+const openRatingPopup = () => {
+  showRatingPopup.value = true;
+};
+
+const closeRatingPopup = () => {
+  showRatingPopup.value = false;
+};
+
+const handleRatingSave = async (data: { rating: number; watchedAt: string }) => {
   if (!movie.value) return;
   
   try {
-    await rateMovie(movie.value, rating);
-    currentRating.value = rating;
-    success('Movie Rated', `You rated ${movie.value.title} ${rating}/5 stars`);
+    await rateMovie(movie.value, data.rating, data.watchedAt);
+    currentRating.value = data.rating;
+    existingWatchedAt.value = data.watchedAt;
+    success('Movie Rated', `You rated ${movie.value.title} ${data.rating}/5 stars`);
+    closeRatingPopup();
   } catch (err) {
     console.error('Failed to rate movie:', err);
     error('Rating Error', 'Failed to save your rating. Please try again.');
-    // Revert the rating on error
-    currentRating.value = getMovieRating.value(movie.value.id);
   }
 };
 
@@ -616,6 +663,70 @@ onMounted(() => {
 
 .rating-section .section-title {
   margin-bottom: var(--spacing-lg);
+}
+
+.current-rating {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-lg);
+}
+
+.rating-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.no-rating {
+  text-align: center;
+  padding: var(--spacing-xl) 0;
+}
+
+.no-rating p {
+  margin: 0 0 var(--spacing-lg) 0;
+  color: var(--color-text-secondary);
+}
+
+.rating-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.rating-btn:hover {
+  background: var(--color-background);
+  color: var(--color-text-primary);
+}
+
+.rating-btn.primary {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.rating-btn.primary:hover {
+  background: var(--color-primary-dark);
+}
+
+.rating-btn.edit:hover {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.rating-btn.remove:hover {
+  background: #ef4444;
+  color: white;
+  border-color: #ef4444;
 }
 
 .details-grid {

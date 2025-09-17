@@ -6,6 +6,7 @@ interface RatedMovie {
   title: string
   poster_path: string
   rating: number
+  watched_at: string
 }
 
 interface RatedTvShow {
@@ -16,6 +17,7 @@ interface RatedTvShow {
   vote_average: number
   overview: string
   rating: number
+  watched_at: string
 }
 
 const movieRatings = ref<Map<number, number>>(new Map())
@@ -117,14 +119,14 @@ export const useRatingStore = () => {
   }
 
   // Rate items
-  const rateMovie = async (movie: any, rating: number) => {
+  const rateMovie = async (movie: any, rating: number, watchedAt?: string) => {
     try {
       // Validate rating
       if (rating < 0.5 || rating > 5.0 || (rating * 2) % 1 !== 0) {
         throw new Error('Rating must be between 0.5 and 5.0 in 0.5 increments')
       }
 
-      await invoke('rate_movie', { movie, rating })
+      await invoke('rate_movie', { movie, rating, watchedAt })
 
       // Update local state
       movieRatings.value.set(movie.id, rating)
@@ -135,7 +137,8 @@ export const useRatingStore = () => {
         id: movie.id,
         title: movie.title,
         poster_path: movie.poster_path,
-        rating
+        rating,
+        watched_at: watchedAt || new Date().toISOString()
       }
 
       if (existingIndex >= 0) {
@@ -151,14 +154,14 @@ export const useRatingStore = () => {
     }
   }
 
-  const rateTvShow = async (show: any, rating: number) => {
+  const rateTvShow = async (show: any, rating: number, watchedAt?: string) => {
     try {
       // Validate rating
       if (rating < 0.5 || rating > 5.0 || (rating * 2) % 1 !== 0) {
         throw new Error('Rating must be between 0.5 and 5.0 in 0.5 increments')
       }
 
-      await invoke('rate_tv_show', { show, rating })
+      await invoke('rate_tv_show', { show, rating, watchedAt })
 
       // Update local state
       tvShowRatings.value.set(show.id, rating)
@@ -172,7 +175,8 @@ export const useRatingStore = () => {
         first_air_date: show.first_air_date || '',
         vote_average: show.vote_average || 0,
         overview: show.overview || '',
-        rating
+        rating,
+        watched_at: watchedAt || new Date().toISOString()
       }
 
       if (existingIndex >= 0) {

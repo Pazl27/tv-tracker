@@ -4,6 +4,7 @@ import PopularPage from '../views/PopularPage.vue';
 import WatchlistPage from '../views/WatchlistPage.vue';
 import MovieDetailsPage from '../views/MovieDetailsPage.vue';
 import TvShowDetailsPage from '../views/TvShowDetailsPage.vue';
+import WatchedPage from '../views/WatchedPage.vue';
 import RatingTest from '../components/RatingTest.vue';
 
 const routes = [
@@ -33,6 +34,11 @@ const routes = [
     name: 'TvShowDetails',
     component: TvShowDetailsPage,
     props: true
+  },
+  {
+    path: '/watched',
+    name: 'Watched',
+    component: WatchedPage
   },
   {
     path: '/test-rating',

@@ -23,6 +23,7 @@ pub struct WatchedMovie {
     pub title: String,
     pub poster_path: String,
     pub rating: f32,
+    pub watched_at: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -34,4 +35,5 @@ pub struct WatchedTvShow {
     pub vote_average: f32,
     pub overview: String,
     pub rating: f32,
+    pub watched_at: String,
 }
