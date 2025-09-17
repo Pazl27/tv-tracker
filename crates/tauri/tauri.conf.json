@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "identifier": "com.gui.app",
   "build": {
-    "beforeDevCommand": "pnpm dev:internal-tauri",
+    "beforeDevCommand": "pnpm internal-tauri:dev",
     "devUrl": "http://localhost:1420",
     "beforeBuildCommand": "pnpm run build --prefix ../apps/desktop",
     "frontendDist": "../apps/desktop/dist"
