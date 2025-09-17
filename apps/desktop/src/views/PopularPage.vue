@@ -27,6 +27,20 @@ const switchTab = (tab: string) => {
 
 const switchSubTab = (subTab: string) => {
   activeSubTab.value = subTab;
+  
+  // Load TV shows when switching to TV tab if not already loaded
+  if (subTab === 'tvShows' && tvShows.value.length === 0 && !searchQuery.value) {
+    loadTvShows();
+  }
+};
+
+const loadTvShows = async () => {
+  try {
+    const { fetchTvShows } = await import('../services/tmdbService');
+    tvShows.value = await fetchTvShows(invoke);
+  } catch (error) {
+    console.error('Failed to load TV shows:', error);
+  }
 };
 
 const handleSearchInput = (query: string) => {

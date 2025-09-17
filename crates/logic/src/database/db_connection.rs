@@ -71,7 +71,7 @@ impl Sqlight {
 
     pub fn insert_movie_to_watch(&self, movie: &MovieToWatch) -> Result<()> {
         self.conn.execute(
-            "INSERT INTO movies_to_watch (id, title, poster_path) VALUES (?1, ?2, ?3)",
+            "INSERT OR REPLACE INTO movies_to_watch (id, title, poster_path) VALUES (?1, ?2, ?3)",
             params![movie.id, movie.title, movie.poster_path],
         )?;
         Ok(())
@@ -143,8 +143,8 @@ impl Sqlight {
 
     pub fn insert_tv_show_to_watch(&self, tv_show: &TvShowToWatch) -> Result<()> {
         self.conn.execute(
-            "INSERT INTO tv_shows_to_watch (name, poster_path) VALUES (?1, ?2)",
-            &[&tv_show.name, &tv_show.poster_path],
+            "INSERT OR REPLACE INTO tv_shows_to_watch (id, name, poster_path) VALUES (?1, ?2, ?3)",
+            params![tv_show.id, tv_show.name, tv_show.poster_path],
         )?;
         Ok(())
     }

@@ -49,10 +49,18 @@ async fn search_tv(query: String) -> Result<Vec<api::Tv>, String> {
 }
 
 #[tauri::command]
-async fn add_movie_to_watchlist(movie: database::entities::MovieToWatch) -> Result<(), String> {
+async fn add_movie_to_watchlist(movie: serde_json::Value) -> Result<(), String> {
     let conn = database::Sqlight::get_connection().map_err(|e| e.to_string())?;
     let db = conn.lock().expect("Failed to lock the mutex");
-    let _ = db.insert_movie_to_watch(&movie).map_err(|e| e.to_string());
+    
+    // Extract the required fields and convert types
+    let movie_to_watch = database::entities::MovieToWatch {
+        id: movie["id"].as_i64().unwrap_or(0) as i32,
+        title: movie["title"].as_str().unwrap_or("").to_string(),
+        poster_path: movie["poster_path"].as_str().unwrap_or("").to_string(),
+    };
+    
+    db.insert_movie_to_watch(&movie_to_watch).map_err(|e| e.to_string())?;
     Ok(())
 }
 
@@ -64,36 +72,94 @@ async fn get_watchlist_movies() -> Result<Vec<database::entities::MovieToWatch>,
 }
 
 #[tauri::command]
-async fn remove_movie_from_watchlist(
-    movie: database::entities::MovieToWatch,
-) -> Result<(), String> {
+async fn remove_movie_from_watchlist(movie: serde_json::Value) -> Result<(), String> {
     let conn = database::Sqlight::get_connection().map_err(|e| e.to_string())?;
     let db = conn.lock().expect("Failed to lock the mutex");
-    db.delete_movie_to_watch(movie.id)
+    
+    let movie_id = movie["id"].as_i64().unwrap_or(0) as i32;
+    db.delete_movie_to_watch(movie_id)
         .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-async fn add_show_to_watchlist(show: database::entities::TvShowToWatch) -> Result<(), String> {
+async fn add_show_to_watchlist(show: serde_json::Value) -> Result<(), String> {
+    println!("Adding TV show to watchlist: {:?}", show);
+    
     let conn = database::Sqlight::get_connection().map_err(|e| e.to_string())?;
     let db = conn.lock().expect("Failed to lock the mutex");
-    let _ = db.insert_tv_show_to_watch(&show).map_err(|e| e.to_string());
+    
+    // Extract the required fields and convert types
+    let show_id = show["id"].as_i64().unwrap_or(0) as i32;
+    let show_name = show["name"].as_str().unwrap_or("").to_string();
+    let show_poster_path = show["poster_path"].as_str().unwrap_or("").to_string();
+    
+    if show_id == 0 {
+        return Err("Invalid show ID".to_string());
+    }
+    
+    if show_name.is_empty() {
+        return Err("Show name is required".to_string());
+    }
+    
+    let tv_show = database::entities::TvShowToWatch {
+        id: show_id,
+        name: show_name,
+        poster_path: show_poster_path,
+    };
+    
+    println!("Inserting TV show: {:?}", tv_show);
+    
+    db.insert_tv_show_to_watch(&tv_show).map_err(|e| {
+        println!("Database error inserting TV show: {}", e);
+        e.to_string()
+    })?;
+    
+    println!("Successfully added TV show to database");
     Ok(())
 }
 
 #[tauri::command]
 async fn get_watchlist_shows() -> Result<Vec<database::entities::TvShowToWatch>, String> {
+    println!("Getting all TV shows from watchlist");
+    
     let conn = database::Sqlight::get_connection().map_err(|e| e.to_string())?;
     let db = conn.lock().expect("Failed to lock the mutex");
-    db.get_all_tv_shows_to_watch().map_err(|e| e.to_string())
+    
+    let result = db.get_all_tv_shows_to_watch().map_err(|e| {
+        println!("Database error getting TV shows: {}", e);
+        e.to_string()
+    })?;
+    
+    println!("Retrieved {} TV shows from database", result.len());
+    for show in &result {
+        println!("TV Show: ID={}, Name={}, Poster={}", show.id, show.name, show.poster_path);
+    }
+    
+    Ok(result)
 }
 
 #[tauri::command]
-async fn remove_show_from_watchlist(show: database::entities::TvShowToWatch) -> Result<(), String> {
+async fn remove_show_from_watchlist(show: serde_json::Value) -> Result<(), String> {
+    println!("Removing TV show from watchlist: {:?}", show);
+    
     let conn = database::Sqlight::get_connection().map_err(|e| e.to_string())?;
     let db = conn.lock().expect("Failed to lock the mutex");
-    db.delete_tv_show_to_watch(show.id)
-        .map_err(|e| e.to_string())
+    
+    let show_id = show["id"].as_i64().unwrap_or(0) as i32;
+    
+    if show_id == 0 {
+        return Err("Invalid show ID".to_string());
+    }
+    
+    println!("Deleting TV show with ID: {}", show_id);
+    
+    db.delete_tv_show_to_watch(show_id).map_err(|e| {
+        println!("Database error deleting TV show: {}", e);
+        e.to_string()
+    })?;
+    
+    println!("Successfully removed TV show from database");
+    Ok(())
 }
 
 #[tauri::command]

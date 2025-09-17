@@ -20,11 +20,17 @@
         @click="goToMovieDetails(movie)"
       >
         <div class="movie-poster-container">
-          <img 
-            :src="movie.poster_url" 
-            :alt="movie.title" 
+          <LazyImage
+            :src="movie.poster_url"
+            :alt="movie.title"
+            aspect-ratio="2/3"
+            quality="medium"
+            :show-spinner="true"
+            root-margin="100px"
             class="movie-poster"
-            loading="lazy"
+            @load="onImageLoad"
+            @error="onImageError"
+            @visible="onImageVisible"
           />
           <div class="movie-overlay">
             <button 
@@ -78,6 +84,7 @@ import { fetchMovies } from '../../services/tmdbService';
 import { defineProps } from 'vue';
 import { useWatchlistStore } from '../../stores/watchlistStore';
 import { useToast } from '../../composables/useToast';
+import LazyImage from '../LazyImage.vue';
 
 const props = defineProps<{ searchedMovies: any[] }>();
 
@@ -87,6 +94,34 @@ const loading = ref(true);
 const router = useRouter();
 const { isMovieInWatchlist, addMovieToWatchlist, removeMovieFromWatchlist } = useWatchlistStore();
 const { success, error } = useToast();
+
+// Performance optimization: preload images that are likely to be viewed next
+const preloadedImages = ref(new Set<string>());
+
+// Image event handlers
+const onImageLoad = (event: Event) => {
+  // Optional: handle successful image loads
+};
+
+const onImageError = (event: Event) => {
+  // Optional: handle image load errors
+};
+
+const onImageVisible = () => {
+  // Optional: handle when image becomes visible
+};
+
+// Preload next few images for better perceived performance
+const preloadNextImages = (currentIndex: number) => {
+  const nextImages = movies.value.slice(currentIndex + 1, currentIndex + 4);
+  nextImages.forEach(movie => {
+    if (!preloadedImages.value.has(movie.poster_url)) {
+      const img = new Image();
+      img.src = movie.poster_url;
+      preloadedImages.value.add(movie.poster_url);
+    }
+  });
+};
 
 // Fetch trending movies
 const loadMovies = async () => {
@@ -124,9 +159,16 @@ const goToMovieDetails = (movie: any) => {
 
 onMounted(() => {
   if (movies.value.length === 0) {
-    loadMovies();
+    loadMovies().then(() => {
+      // Preload first few images immediately
+      if (movies.value.length > 0) {
+        preloadNextImages(-1);
+      }
+    });
   } else {
     loading.value = false;
+    // Preload first few images
+    preloadNextImages(-1);
   }
 });
 
@@ -134,6 +176,9 @@ watch(() => props.searchedMovies, (newMovies) => {
   if (newMovies && newMovies.length > 0) {
     movies.value = newMovies;
     loading.value = false;
+    // Clear previous preloaded images and preload new ones
+    preloadedImages.value.clear();
+    preloadNextImages(-1);
   }
 });
 </script>
@@ -149,6 +194,10 @@ watch(() => props.searchedMovies, (newMovies) => {
   display: grid;
   gap: var(--spacing-lg);
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  /* Performance optimizations */
+  will-change: contents;
+  contain: layout style;
+  transform: translateZ(0); /* Force hardware acceleration */
 }
 
 /* Movie Card Styles */
@@ -158,9 +207,13 @@ watch(() => props.searchedMovies, (newMovies) => {
   border-radius: var(--radius-large);
   overflow: hidden;
   cursor: pointer;
-  transition: all var(--transition-medium);
+  transition: transform var(--transition-medium), box-shadow var(--transition-medium), border-color var(--transition-fast);
   box-shadow: var(--shadow-small);
   position: relative;
+  /* Performance optimizations */
+  will-change: transform, box-shadow;
+  contain: layout style paint;
+  backface-visibility: hidden;
 }
 
 .movie-card:hover {
@@ -185,10 +238,10 @@ watch(() => props.searchedMovies, (newMovies) => {
 }
 
 .movie-poster {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
   transition: transform var(--transition-medium);
+  /* Performance optimizations */
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 .movie-card:hover .movie-poster {
@@ -364,6 +417,25 @@ watch(() => props.searchedMovies, (newMovies) => {
   margin: 0;
 }
 
+/* Performance optimizations for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .movie-card {
+    transition: none;
+  }
+  
+  .movie-poster {
+    transition: none;
+  }
+  
+  .movie-card:hover {
+    transform: none;
+  }
+  
+  .movie-card:hover .movie-poster {
+    transform: none;
+  }
+}
+
 /* Responsive Design */
 @media (min-width: 1600px) {
   .movie-grid {
@@ -424,6 +496,37 @@ watch(() => props.searchedMovies, (newMovies) => {
   .action-button svg {
     width: 16px;
     height: 16px;
+  }
+}
+
+/* GPU acceleration for better performance */
+@supports (transform: translateZ(0)) {
+  .movie-card {
+    transform: translateZ(0);
+  }
+  
+  .movie-overlay {
+    transform: translateZ(0);
+  }
+}
+
+/* Container queries for better responsive behavior */
+@supports (container-type: inline-size) {
+  .movie-grid-container {
+    container-type: inline-size;
+  }
+  
+  @container (max-width: 600px) {
+    .movie-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--spacing-sm);
+    }
+  }
+  
+  @container (min-width: 1400px) {
+    .movie-grid {
+      grid-template-columns: repeat(7, 1fr);
+    }
   }
 }
 </style>

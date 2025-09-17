@@ -20,11 +20,17 @@
         @click="goToMovieDetails(movie)"
       >
         <div class="movie-poster-container">
-          <img 
-            :src="movie.poster_url" 
-            :alt="movie.title" 
+          <LazyImage
+            :src="movie.poster_url"
+            :alt="movie.title"
+            aspect-ratio="2/3"
+            quality="medium"
+            :show-spinner="true"
+            root-margin="100px"
             class="movie-poster"
-            loading="lazy"
+            @load="onImageLoad"
+            @error="onImageError"
+            @visible="onImageVisible"
           />
           <div class="movie-overlay">
             <button 
@@ -82,12 +88,26 @@ import { fetchMovieWatchlist } from '../../services/tmdbService';
 import { useWatchlistStore } from '../../stores/watchlistStore';
 import { useToast } from '../../composables/useToast';
 import { useRouter } from 'vue-router';
+import LazyImage from '../LazyImage.vue';
 
 const props = defineProps<{ searchQuery: string }>();
 
 const { watchlistMovies, isLoadingMovies, removeMovieFromWatchlist } = useWatchlistStore();
 const { success, error } = useToast();
 const router = useRouter();
+
+// Image event handlers
+const onImageLoad = (event: Event) => {
+  // Optional: handle successful image loads
+};
+
+const onImageError = (event: Event) => {
+  // Optional: handle image load errors
+};
+
+const onImageVisible = () => {
+  // Optional: handle when image becomes visible
+};
 
 const removeFromWatchlist = async (movie: any) => {
   try {
@@ -170,9 +190,6 @@ const filteredMovies = computed(() => {
 }
 
 .movie-poster {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
   transition: transform var(--transition-medium);
 }
 

@@ -218,97 +218,77 @@ impl Tmdb {
 
     pub async fn trending_movies(&self) -> Option<Vec<Movie>> {
         let client = Client::new();
-        let mut all_movies = Vec::new();
-        let mut seen_ids = HashSet::new();
+        let url = format!(
+            "{}/trending/movie/day?language=en-US&page=1",
+            self.url
+        );
 
-        for page in 1..=3 {
-            let url = format!(
-                "{}/trending/movie/day?language=en-US&page={}",
-                self.url,
-                page
-            );
+        let response = client
+            .get(&url)
+            .header("Authorization", format!("Bearer {}", self.api_key))
+            .header("accept", "application/json")
+            .send()
+            .await
+            .unwrap();
 
-            let response = client
-                .get(&url)
-                .header("Authorization", format!("Bearer {}", self.api_key))
-                .header("accept", "application/json")
-                .send()
-                .await
-                .unwrap();
+        let response_text = response.text().await.unwrap();
+        let json: Value = serde_json::from_str(&response_text).unwrap();
 
-            let response_text = response.text().await.unwrap();
-            let json: Value = serde_json::from_str(&response_text).unwrap();
+        if let Some(results) = json["results"].as_array() {
+            let movies: Vec<Movie> = results
+                .iter()
+                .map(|movie| Movie {
+                    id: movie["id"].as_u64().unwrap() as u32,
+                    title: movie["title"].as_str().unwrap().to_string(),
+                    poster_path: movie["poster_path"].as_str().unwrap().to_string(),
+                })
+                .collect();
 
-            if let Some(results) = json["results"].as_array() {
-                let movies: Vec<Movie> = results
-                    .iter()
-                    .map(|movie| Movie {
-                        id: movie["id"].as_u64().unwrap() as u32,
-                        title: movie["title"].as_str().unwrap().to_string(),
-                        poster_path: movie["poster_path"].as_str().unwrap().to_string(),
-                    })
-                    .collect();
-
-                for movie in movies {
-                    if seen_ids.insert(movie.id) {
-                        all_movies.push(movie);
-                    }
-                }
+            if movies.is_empty() {
+                None
+            } else {
+                Some(movies)
             }
-        }
-
-        if all_movies.is_empty() {
-            None
         } else {
-            Some(all_movies)
+            None
         }
     }
 
     pub async fn trending_tv(&self) -> Option<Vec<Tv>> {
         let client = Client::new();
-        let mut all_shows = Vec::new();
-        let mut seen_ids = HashSet::new();
+        let url = format!(
+            "{}/trending/tv/day?language=en-US&page=1",
+            self.url
+        );
 
-        for page in 1..=3 {
-            let url = format!(
-                "{}/trending/tv/day?language=en-US&page={}",
-                self.url,
-                page
-            );
+        let response = client
+            .get(&url)
+            .header("Authorization", format!("Bearer {}", self.api_key))
+            .header("accept", "application/json")
+            .send()
+            .await
+            .unwrap();
 
-            let response = client
-                .get(&url)
-                .header("Authorization", format!("Bearer {}", self.api_key))
-                .header("accept", "application/json")
-                .send()
-                .await
-                .unwrap();
+        let response_text = response.text().await.unwrap();
+        let json: Value = serde_json::from_str(&response_text).unwrap();
 
-            let response_text = response.text().await.unwrap();
-            let json: Value = serde_json::from_str(&response_text).unwrap();
+        if let Some(results) = json["results"].as_array() {
+            let shows: Vec<Tv> = results
+                .iter()
+                .map(|show| Tv {
+                    id: show["id"].as_u64().unwrap() as u32,
+                    name: show["name"].as_str().unwrap().to_string(),
+                    poster_path: show["poster_path"].as_str().unwrap().to_string(),
+                })
+                .collect();
 
-            if let Some(results) = json["results"].as_array() {
-                let shows: Vec<Tv> = results
-                    .iter()
-                    .map(|show| Tv {
-                        id: show["id"].as_u64().unwrap() as u32,
-                        name: show["name"].as_str().unwrap().to_string(),
-                        poster_path: show["poster_path"].as_str().unwrap().to_string(),
-                    })
-                    .collect();
-
-                for show in shows {
-                    if seen_ids.insert(show.id) {
-                        all_shows.push(show);
-                    }
-                }
+            if shows.is_empty() {
+                None
+            } else {
+                Some(shows)
             }
-        }
-
-        if all_shows.is_empty() {
-            None
         } else {
-            Some(all_shows)
+            None
         }
     }
 

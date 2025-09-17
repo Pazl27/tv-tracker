@@ -20,11 +20,17 @@
         @click="goToShowDetails(show)"
       >
         <div class="tvshow-poster-container">
-          <img 
-            :src="show.poster_url" 
-            :alt="show.name" 
+          <LazyImage
+            :src="show.poster_url"
+            :alt="show.name"
+            aspect-ratio="2/3"
+            quality="medium"
+            :show-spinner="true"
+            root-margin="100px"
             class="tvshow-poster"
-            loading="lazy"
+            @load="onImageLoad"
+            @error="onImageError"
+            @visible="onImageVisible"
           />
           <div class="tvshow-overlay">
             <button 
@@ -83,6 +89,7 @@ import { fetchTvShows } from '../../services/tmdbService';
 import { defineProps } from 'vue';
 import { useWatchlistStore } from '../../stores/watchlistStore';
 import { useToast } from '../../composables/useToast';
+import LazyImage from '../LazyImage.vue';
 
 const props = defineProps<{ searchedTvShows: any[] }>();
 
@@ -91,6 +98,19 @@ const loading = ref(true);
 
 const { isTvShowInWatchlist, addTvShowToWatchlist, removeTvShowFromWatchlist } = useWatchlistStore();
 const { success, error } = useToast();
+
+// Image event handlers
+const onImageLoad = (event: Event) => {
+  // Optional: handle successful image loads
+};
+
+const onImageError = (event: Event) => {
+  // Optional: handle image load errors
+};
+
+const onImageVisible = () => {
+  // Optional: handle when image becomes visible
+};
 
 // Fetch trending TV shows
 const loadTvShows = async () => {
@@ -188,9 +208,6 @@ watch(() => props.searchedTvShows, (newTvShows) => {
 }
 
 .tvshow-poster {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
   transition: transform var(--transition-medium);
 }
 
