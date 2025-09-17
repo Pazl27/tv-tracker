@@ -9,6 +9,7 @@
   ],
   "scripts": {
     "desktop:dev": "cargo build && pnpm tauri dev",
+    "desktop:build": "pnpm tauri build",
     "tauri": "tauri",
     "internal-tauri:dev": "pnpm --filter @tv-tracker/desktop run dev",
     "prettier:desktop": "prettier --check 'apps/desktop/**/*.{js,ts,vue,css,scss,md,json}'",

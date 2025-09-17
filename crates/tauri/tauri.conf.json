@@ -1,12 +1,12 @@
 {
   "productName": "gui",
   "version": "0.1.0",
-  "identifier": "com.gui.app",
+  "identifier": "com.tvtracker.desktop",
   "build": {
     "beforeDevCommand": "pnpm internal-tauri:dev",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "pnpm run build --prefix ../apps/desktop",
-    "frontendDist": "../apps/desktop/dist"
+    "beforeBuildCommand": "pnpm --filter @tv-tracker/desktop run build",
+    "frontendDist": "../../apps/desktop/dist"
   },
   "app": {
     "windows": [
