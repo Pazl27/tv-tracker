@@ -1,16 +1,77 @@
 <template>
-  <div class="movie-grid">
-    <!-- Skeleton loaders with the same structure as TV show cards -->
-    <div v-if="loading" class="skeleton-loader" v-for="n in 60" :key="n">
-      <div class="skeleton-poster"></div>
-      <div class="skeleton-title"></div>
+  <div class="tvshow-grid-container">
+    <!-- Skeleton loaders -->
+    <div v-if="loading" class="tvshow-grid">
+      <div v-for="n in 20" :key="n" class="skeleton-card">
+        <div class="skeleton-poster animate-shimmer"></div>
+        <div class="skeleton-content">
+          <div class="skeleton-title animate-shimmer"></div>
+          <div class="skeleton-subtitle animate-shimmer"></div>
+        </div>
+      </div>
     </div>
 
     <!-- TV Show Cards -->
-    <div v-else class="movie-card" v-for="show in tvShows" :key="show.id">
-      <img :src="show.poster_url" :alt="show.name" class="movie-poster" />
-      <h3 class="movie-title">{{ show.name }}</h3>
-      <button class="add-button" @click="addToWatchlist(show)"><i class="plus-icon">+</i></button>
+    <div v-else class="tvshow-grid">
+      <div 
+        v-for="show in tvShows" 
+        :key="show.id" 
+        class="tvshow-card"
+        @click="goToShowDetails(show)"
+      >
+        <div class="tvshow-poster-container">
+          <img 
+            :src="show.poster_url" 
+            :alt="show.name" 
+            class="tvshow-poster"
+            loading="lazy"
+          />
+          <div class="tvshow-overlay">
+            <button 
+              class="action-button add-button" 
+              @click.stop="toggleWatchlist(show)"
+              :title="isTvShowInWatchlist(show.id) ? 'Remove from Watchlist' : 'Add to Watchlist'"
+              :class="{ 'in-watchlist': isTvShowInWatchlist(show.id) }"
+            >
+              <svg v-if="!isTvShowInWatchlist(show.id)" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+
+          </div>
+          <div class="rating-badge" v-if="show.vote_average">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
+            </svg>
+            <span>{{ show.vote_average.toFixed(1) }}</span>
+          </div>
+          <div class="tv-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M7 21H17C18.1046 21 19 20.1046 19 19V5C19 3.89543 18.1046 3 17 3H7C5.89543 3 5 3.89543 5 5V19C5 20.1046 5.89543 21 7 21ZM9 9H15V15H9V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>TV</span>
+          </div>
+        </div>
+        
+        <div class="tvshow-content">
+          <h3 class="tvshow-title">{{ show.name }}</h3>
+          <p class="tvshow-year" v-if="show.first_air_date">
+            {{ new Date(show.first_air_date).getFullYear() }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div v-if="!loading && tvShows.length === 0" class="empty-state">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M7 21H17C18.1046 21 19 20.1046 19 19V5C19 3.89543 18.1046 3 17 3H7C5.89543 3 5 3.89543 5 5V19C5 20.1046 5.89543 21 7 21ZM9 9H15V15H9V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <h3>No TV shows found</h3>
+      <p>Try adjusting your search criteria</p>
     </div>
   </div>
 </template>
@@ -20,11 +81,16 @@ import { ref, onMounted, watch } from 'vue';
 import { invoke } from "@tauri-apps/api/core";
 import { fetchTvShows } from '../../services/tmdbService';
 import { defineProps } from 'vue';
+import { useWatchlistStore } from '../../stores/watchlistStore';
+import { useToast } from '../../composables/useToast';
 
 const props = defineProps<{ searchedTvShows: any[] }>();
 
 const tvShows = ref<any[]>(props.searchedTvShows || []);
 const loading = ref(true);
+
+const { isTvShowInWatchlist, addTvShowToWatchlist, removeTvShowFromWatchlist } = useWatchlistStore();
+const { success, error } = useToast();
 
 // Fetch trending TV shows
 const loadTvShows = async () => {
@@ -38,13 +104,24 @@ const loadTvShows = async () => {
   }
 };
 
-const addToWatchlist = async (show: any) => {
+const toggleWatchlist = async (show: any) => {
   try {
-    await invoke('add_show_to_watchlist', { show });
-    console.log('Added to watchlist:', show);
-  } catch (error) {
-    console.error('Failed to add show to watchlist:', error);
+    if (isTvShowInWatchlist(show.id)) {
+      await removeTvShowFromWatchlist(show);
+      success('Removed from Watchlist', `${show.name} has been removed from your watchlist`);
+    } else {
+      await addTvShowToWatchlist(show);
+      success('Added to Watchlist', `${show.name} has been added to your watchlist`);
+    }
+  } catch (err) {
+    console.error('Failed to update watchlist:', err);
+    error('Watchlist Error', 'Failed to update your watchlist. Please try again.');
   }
+};
+
+const goToShowDetails = (show: any) => {
+  // TODO: Implement TV show details page
+  console.log('Go to show details:', show);
 };
 
 // Fetch initial TV shows when component mounts
@@ -65,118 +142,308 @@ watch(() => props.searchedTvShows, (newTvShows) => {
 </script>
 
 <style scoped>
-.movie-grid {
+.tvshow-grid-container {
+  padding: var(--spacing-lg);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.tvshow-grid {
   display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--spacing-lg);
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 }
 
-.movie-card, .skeleton-loader {
-  box-sizing: border-box;
-  border: 2px solid var(--color-border);
-  border-radius: 3%;
-  background: var(--color-background-dark);
+/* TV Show Card Styles */
+.tvshow-card {
+  background: var(--color-card-background);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-large);
   overflow: hidden;
-  text-align: center;
-  position: relative; 
+  cursor: pointer;
+  transition: all var(--transition-medium);
+  box-shadow: var(--shadow-small);
+  position: relative;
 }
 
-.movie-card:hover {
-  border: 2px solid var(--color-border-hover);
+.tvshow-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-large);
+  border-color: var(--color-accent-primary);
 }
 
-.skeleton-loader:hover {
-  border: 2px solid var(--color-border-hover);
+.tvshow-card:hover .tvshow-content {
+  background: linear-gradient(135deg, var(--color-card-background) 0%, var(--color-surface) 100%);
 }
 
-.movie-poster {
+.tvshow-card:active {
+  transform: translateY(-2px);
+  transition: transform var(--transition-fast);
+}
+
+.tvshow-poster-container {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 2/3;
+}
+
+.tvshow-poster {
   width: 100%;
-  height: 300px;
+  height: 100%;
   object-fit: cover;
+  transition: transform var(--transition-medium);
 }
 
-.movie-title {
-  margin: 8px 0;
-  font-size: 16px;
+.tvshow-card:hover .tvshow-poster {
+  transform: scale(1.05);
+}
+
+.tvshow-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.1) 50%,
+    rgba(0, 0, 0, 0.8) 100%
+  );
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: var(--spacing-md);
+  opacity: 0;
+  transition: opacity var(--transition-medium);
+}
+
+.tvshow-card:hover .tvshow-overlay {
+  opacity: 1;
+}
+
+.action-button {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  min-height: auto;
+}
+
+.action-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: scale(1.1);
+}
+
+.add-button:hover {
+  background: var(--color-accent-primary);
+  border-color: var(--color-accent-primary);
+}
+
+.add-button.in-watchlist {
+  background: var(--color-success);
+  border-color: var(--color-success);
+}
+
+.add-button.in-watchlist:hover {
+  background: var(--color-error);
+  border-color: var(--color-error);
+}
+
+
+
+.rating-badge {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  color: #fbbf24;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-medium);
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.tv-badge {
+  position: absolute;
+  top: var(--spacing-sm);
+  left: var(--spacing-sm);
+  background: rgba(99, 102, 241, 0.9);
+  backdrop-filter: blur(8px);
+  color: white;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-medium);
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.tvshow-content {
+  padding: var(--spacing-md);
+  transition: background var(--transition-medium);
+  position: relative;
+}
+
+.tvshow-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-xs) 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: color var(--transition-fast);
+}
+
+.tvshow-card:hover .tvshow-title {
+  color: var(--color-accent-primary);
+}
+
+.tvshow-year {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  margin: 0;
 }
 
 /* Skeleton Loader Styles */
-.skeleton-loader {
-  background: var(--color-background-light);
+.skeleton-card {
+  background: var(--color-card-background);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-large);
+  overflow: hidden;
 }
 
 .skeleton-poster {
-  width: 100%;
-  height: 300px;
-  background: var(--color-background-dark);
+  aspect-ratio: 2/3;
+  background: var(--color-surface);
+}
+
+.skeleton-content {
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
 }
 
 .skeleton-title {
-  width: 60%;
   height: 20px;
-  margin: 10px auto;
-  background: var(--color-background-dark);
+  background: var(--color-surface);
+  border-radius: var(--radius-small);
+  width: 80%;
 }
 
-.add-button {
-  display: none;
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  background-color: var(--color-border-hover);
-  border: none;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  color: white;
-  font-size: 24px;
-  cursor: pointer;
+.skeleton-subtitle {
+  height: 16px;
+  background: var(--color-surface);
+  border-radius: var(--radius-small);
+  width: 40%;
 }
 
-.movie-card:hover .add-button {
-  display: block;
+/* Empty State */
+.empty-state {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-2xl);
+  text-align: center;
+  color: var(--color-text-secondary);
 }
 
-@keyframes pulse {
-  0% {
-    background-color: var(--color-background-light);
-  }
-  50% {
-    background-color: var(--color-background-dark);
-  }
-  100% {
-    background-color: var(--color-background-light);
-  }
+.empty-state svg {
+  color: var(--color-text-muted);
+  margin-bottom: var(--spacing-md);
 }
 
-/* Responsive Styles */
-@media (min-width: 1200px) {
-  .movie-grid {
-    grid-template-columns: repeat(8, 1fr); /* 8 cards per row */
-  }
+.empty-state h3 {
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-sm);
 }
 
-@media (min-width: 992px) and (max-width: 1199px) {
-  .movie-grid {
-    grid-template-columns: repeat(6, 1fr); /* 6 cards per row */
+.empty-state p {
+  margin: 0;
+}
+
+/* Responsive Design */
+@media (min-width: 1600px) {
+  .tvshow-grid {
+    grid-template-columns: repeat(8, 1fr);
   }
 }
 
-@media (min-width: 768px) and (max-width: 991px) {
-  .movie-grid {
-    grid-template-columns: repeat(4, 1fr); /* 4 cards per row */
+@media (min-width: 1200px) and (max-width: 1599px) {
+  .tvshow-grid {
+    grid-template-columns: repeat(6, 1fr);
   }
 }
 
-@media (max-width: 767px) {
-  .movie-grid {
-    grid-template-columns: repeat(2, 1fr); /* 2 cards per row */
+@media (min-width: 768px) and (max-width: 1199px) {
+  .tvshow-grid {
+    grid-template-columns: repeat(4, 1fr);
   }
 }
 
-@media (max-width: 480px) {
-  .movie-grid {
-    grid-template-columns: repeat(1, 1fr); /* 1 card per row */
+@media (min-width: 480px) and (max-width: 767px) {
+  .tvshow-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-md);
+  }
+  
+  .tvshow-grid-container {
+    padding: var(--spacing-md);
+  }
+}
+
+@media (max-width: 479px) {
+  .tvshow-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-sm);
+  }
+  
+  .tvshow-grid-container {
+    padding: var(--spacing-sm);
+  }
+  
+  .tvshow-content {
+    padding: var(--spacing-sm);
+  }
+  
+  .tvshow-title {
+    font-size: 0.875rem;
+  }
+  
+  .tvshow-year {
+    font-size: 0.75rem;
+  }
+  
+  .action-button {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .action-button svg {
+    width: 16px;
+    height: 16px;
   }
 }
 </style>

@@ -6,12 +6,12 @@
   />
   <div v-if="activeSubTab === 'movies'">
     <WatchlistMovieGrid
-      :watchlistMovies="watchlistMovies"
+      :searchQuery="searchQuery"
     />
   </div>
   <div v-else>
     <WatchlistTvShowGrid
-      :watchlistTvShows="watchlistTvShows"
+      :searchQuery="searchQuery"
     />
   </div>
 </template>

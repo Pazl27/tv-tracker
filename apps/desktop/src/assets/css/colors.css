@@ -1,7 +1,73 @@
 :root {
-  --color-background-light: #e0e0e0;
-  --color-background-dark: #f0f0f0;
-  --color-border: #fff;
-  --color-border-hover: #009D1A;
-  --background-color: #14181C;
+  /* Dark theme colors */
+  --color-background: #0d1117;
+  --color-background-secondary: #161b22;
+  --color-background-tertiary: #21262d;
+  --color-surface: #30363d;
+  --color-surface-hover: #373e47;
+  
+  /* Text colors */
+  --color-text-primary: #f0f6fc;
+  --color-text-secondary: #8b949e;
+  --color-text-muted: #656d76;
+  
+  /* Accent colors */
+  --color-accent-primary: #238636;
+  --color-accent-primary-hover: #2ea043;
+  --color-accent-secondary: #1f6feb;
+  --color-accent-secondary-hover: #388bfd;
+  
+  /* Border colors */
+  --color-border: #30363d;
+  --color-border-hover: #58a6ff;
+  --color-border-accent: #238636;
+  
+  /* Status colors */
+  --color-success: #238636;
+  --color-warning: #d29922;
+  --color-error: #da3633;
+  
+  /* Card colors */
+  --color-card-background: #161b22;
+  --color-card-border: #30363d;
+  --color-card-hover: #21262d;
+  
+  /* Button colors */
+  --color-button-primary: #238636;
+  --color-button-primary-hover: #2ea043;
+  --color-button-secondary: #21262d;
+  --color-button-secondary-hover: #30363d;
+  
+  /* Shadow */
+  --shadow-small: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-large: 0 8px 24px rgba(0, 0, 0, 0.5);
+  
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-medium: 0.3s ease;
+  --transition-slow: 0.5s ease;
+  
+  /* Border radius */
+  --radius-small: 6px;
+  --radius-medium: 8px;
+  --radius-large: 12px;
+  --radius-xl: 16px;
+  
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+}
+
+/* Legacy color variables for backward compatibility */
+:root {
+  --color-background-light: var(--color-background-secondary);
+  --color-background-dark: var(--color-card-background);
+  --color-border: var(--color-card-border);
+  --color-border-hover: var(--color-accent-primary);
+  --background-color: var(--color-background);
 }
