@@ -2,22 +2,26 @@
 resolver = "2"
 members = [
   "crates/tauri",
-  "crates/logic"
+  "crates/logic",
+  "crates/markdown-renderer"
 ]
 
 [workspace.package]
 authors = ["Pazl"]
 edition = "2021"
 version = "0.1.0"
-description = "TV show tracker"
+description = "TV show and movie tracker"
 
 [workspace.dependencies]
 logic = { path = "./crates/logic" }
+markdown-renderer = { path = "./crates/markdown-renderer" }
+
 tauri = { version = "2", features = [] }
 tauri-plugin-opener = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 anyhow = "1.0.96"
+thiserror = "2.0.16"
 dirs = "6.0"
 toml = "0.8.20"
 reqwest = "0.12.12"
