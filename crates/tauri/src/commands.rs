@@ -1,5 +1,6 @@
 use logic::{api, database};
 use chrono;
+use markdown_renderer;
 
 // API Commands
 
@@ -81,6 +82,7 @@ pub async fn add_movie_to_watchlist(movie: serde_json::Value) -> Result<(), Stri
         id: movie["id"].as_i64().unwrap_or(0) as i32,
         title: movie["title"].as_str().unwrap_or("").to_string(),
         poster_path: movie["poster_path"].as_str().unwrap_or("").to_string(),
+        notes: String::new(),
     };
 
     db.insert_movie_to_watch(&movie_to_watch).map_err(|e| e.to_string())?;
@@ -135,6 +137,7 @@ pub async fn add_show_to_watchlist(show: serde_json::Value) -> Result<(), String
         first_air_date: show_first_air_date,
         vote_average: show_vote_average,
         overview: show_overview,
+        notes: String::new(),
     };
 
     db.insert_tv_show_to_watch(&tv_show).map_err(|e| {
@@ -196,6 +199,7 @@ pub async fn rate_movie(movie: serde_json::Value, rating: f32, watched_at: Optio
         poster_path: movie["poster_path"].as_str().unwrap_or("").to_string(),
         rating,
         watched_at: watched_at.unwrap_or_else(|| chrono::Utc::now().to_rfc3339()),
+        notes: String::new(),
     };
 
     db.rate_movie(&watched_movie).map_err(|e| e.to_string())?;
@@ -220,6 +224,7 @@ pub async fn rate_tv_show(show: serde_json::Value, rating: f32, watched_at: Opti
         overview: show["overview"].as_str().unwrap_or("").to_string(),
         rating,
         watched_at: watched_at.unwrap_or_else(|| chrono::Utc::now().to_rfc3339()),
+        notes: String::new(),
     };
 
     db.rate_tv_show(&watched_tv_show).map_err(|e| e.to_string())?;
@@ -272,4 +277,75 @@ pub async fn get_all_rated_tv_shows() -> Result<Vec<database::entities::WatchedT
     let db = conn.lock().expect("Failed to lock the mutex");
 
     db.get_all_rated_tv_shows().map_err(|e| e.to_string())
+}
+
+// Notes Commands
+
+#[tauri::command]
+pub async fn update_movie_notes(movie_id: i32, notes: String) -> Result<(), String> {
+    let conn = database::Sqlight::get_connection().map_err(|e| e.to_string())?;
+    let db = conn.lock().expect("Failed to lock the mutex");
+
+    db.update_movie_notes(movie_id, &notes).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn update_tv_show_notes(tv_show_id: i32, notes: String) -> Result<(), String> {
+    let conn = database::Sqlight::get_connection().map_err(|e| e.to_string())?;
+    let db = conn.lock().expect("Failed to lock the mutex");
+
+    db.update_tv_show_notes(tv_show_id, &notes).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn update_watched_movie_notes(movie_id: i32, notes: String) -> Result<(), String> {
+    let conn = database::Sqlight::get_connection().map_err(|e| e.to_string())?;
+    let db = conn.lock().expect("Failed to lock the mutex");
+
+    db.update_watched_movie_notes(movie_id, &notes).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn update_watched_tv_show_notes(tv_show_id: i32, notes: String) -> Result<(), String> {
+    let conn = database::Sqlight::get_connection().map_err(|e| e.to_string())?;
+    let db = conn.lock().expect("Failed to lock the mutex");
+
+    db.update_watched_tv_show_notes(tv_show_id, &notes).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn get_movie_notes(movie_id: i32) -> Result<Option<String>, String> {
+    let conn = database::Sqlight::get_connection().map_err(|e| e.to_string())?;
+    let db = conn.lock().expect("Failed to lock the mutex");
+
+    db.get_movie_notes(movie_id).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn get_tv_show_notes(tv_show_id: i32) -> Result<Option<String>, String> {
+    let conn = database::Sqlight::get_connection().map_err(|e| e.to_string())?;
+    let db = conn.lock().expect("Failed to lock the mutex");
+
+    db.get_tv_show_notes(tv_show_id).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn get_watched_movie_notes(movie_id: i32) -> Result<Option<String>, String> {
+    let conn = database::Sqlight::get_connection().map_err(|e| e.to_string())?;
+    let db = conn.lock().expect("Failed to lock the mutex");
+
+    db.get_watched_movie_notes(movie_id).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn get_watched_tv_show_notes(tv_show_id: i32) -> Result<Option<String>, String> {
+    let conn = database::Sqlight::get_connection().map_err(|e| e.to_string())?;
+    let db = conn.lock().expect("Failed to lock the mutex");
+
+    db.get_watched_tv_show_notes(tv_show_id).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn render_markdown_to_html(markdown: String) -> Result<String, String> {
+    markdown_renderer::markdown_to_html(&markdown).map_err(|e| e.to_string())
 }

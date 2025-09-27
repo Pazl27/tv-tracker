@@ -4320,6 +4320,7 @@ version = "0.1.0"
 dependencies = [
  "chrono",
  "logic",
+ "markdown-renderer",
  "serde",
  "serde_json",
  "tauri",

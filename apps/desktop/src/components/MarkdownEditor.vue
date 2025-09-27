@@ -29,78 +29,7 @@
     <div class="editor-content">
       <!-- Edit Mode -->
       <div v-if="activeTab === 'edit'" class="edit-pane">
-        <div class="toolbar">
-          <div class="toolbar-group">
-            <button
-              class="toolbar-btn"
-              @click="insertMarkdown('**', '**', 'bold text')"
-              title="Bold (Ctrl+B)"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M6 12H9.5C10.8807 12 12 10.8807 12 9.5V9.5C12 8.11929 10.8807 7 9.5 7H6V12ZM6 12H10.5C11.8807 12 13 13.1193 13 14.5V14.5C13 15.8807 11.8807 17 10.5 17H6V12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
-            <button
-              class="toolbar-btn"
-              @click="insertMarkdown('*', '*', 'italic text')"
-              title="Italic (Ctrl+I)"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <line x1="19" y1="4" x2="10" y2="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <line x1="14" y1="20" x2="5" y2="20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <line x1="15" y1="4" x2="9" y2="20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
-          </div>
 
-          <div class="toolbar-group">
-            <button
-              class="toolbar-btn"
-              @click="insertMarkdown('## ', '', 'Heading')"
-              title="Heading"
-            >
-              H
-            </button>
-            <button
-              class="toolbar-btn"
-              @click="insertMarkdown('- ', '', 'List item')"
-              title="List"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <line x1="8" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <line x1="8" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <line x1="8" y1="18" x2="21" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <line x1="3" y1="6" x2="3.01" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <line x1="3" y1="12" x2="3.01" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <line x1="3" y1="18" x2="3.01" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
-            <button
-              class="toolbar-btn"
-              @click="insertMarkdown('[', '](url)', 'Link text')"
-              title="Link"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M10 13C10.4295 13.5741 10.9774 14.0491 11.6066 14.3929C12.2357 14.7367 12.9315 14.9411 13.6467 14.9923C14.3618 15.0435 15.0796 14.9403 15.7513 14.6897C16.4231 14.4392 17.0331 14.047 17.54 13.54L20.54 10.54C21.4508 9.59695 21.9548 8.33394 21.9434 7.02296C21.932 5.71198 21.4061 4.45791 20.4791 3.53087C19.5521 2.60383 18.298 2.07799 16.987 2.0666C15.676 2.0552 14.413 2.55918 13.47 3.47L11.75 5.18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M14 11C13.5705 10.4259 13.0226 9.95088 12.3934 9.60707C11.7643 9.26327 11.0685 9.05892 10.3533 9.00771C9.63819 8.9565 8.92037 9.05973 8.24864 9.31026C7.5769 9.56079 6.96687 9.95302 6.46 10.46L3.46 13.46C2.54917 14.403 2.04519 15.6661 2.05659 16.977C2.06798 18.288 2.59382 19.5421 3.52086 20.4691C4.44791 21.3962 5.70198 21.922 7.01296 21.9334C8.32394 21.9448 9.58695 21.4408 10.53 20.53L12.24 18.82" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
-          </div>
-
-          <div class="toolbar-group">
-            <button
-              v-if="modelValue"
-              class="toolbar-btn clear-btn"
-              @click="clearContent"
-              title="Clear all content"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <polyline points="3,6 5,6 21,6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M19,6V20C19,21.1046 18.1046,22 17,22H7C5.89543,22 5,21.1046 5,20V6M8,6V4C8,2.89543 8.89543,2 10,2H14C15.1046,2 16,2.89543 16,4V6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
-          </div>
-        </div>
 
         <textarea
           ref="textareaRef"
@@ -112,12 +41,6 @@
         ></textarea>
 
         <div class="editor-footer">
-          <div class="markdown-help">
-            <span class="help-text">
-              Supports <strong>**bold**</strong>, <em>*italic*</em>,
-              <code># headings</code>, <code>- lists</code>, and <code>[links](url)</code>
-            </span>
-          </div>
           <div class="character-count">
             {{ localValue.length }}/{{ maxLength || '∞' }} characters
           </div>
@@ -132,7 +55,6 @@
             <polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
           <p>No content to preview</p>
-          <p class="help-text">Switch to Edit mode to start writing your notes</p>
         </div>
         <div v-else class="preview-content" v-html="renderedHtml"></div>
       </div>
@@ -273,13 +195,7 @@ const renderMarkdown = async () => {
   }
 }
 
-const clearContent = () => {
-  if (confirm('Are you sure you want to clear all content? This cannot be undone.')) {
-    localValue.value = ''
-    emit('update:modelValue', '')
-    renderedHtml.value = ''
-  }
-}
+
 
 const saveContent = () => {
   emit('save', localValue.value)
@@ -380,57 +296,7 @@ watch(activeTab, (tab) => {
   flex-direction: column;
 }
 
-.toolbar {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-sm) var(--spacing-md);
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
-}
 
-.toolbar-group {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-}
-
-.toolbar-group:not(:last-child)::after {
-  content: '';
-  width: 1px;
-  height: 16px;
-  background: var(--color-border);
-  margin-left: var(--spacing-sm);
-}
-
-.toolbar-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: var(--radius-small);
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  font-size: 0.875rem;
-  font-weight: 600;
-  min-height: auto;
-}
-
-.toolbar-btn:hover {
-  background: var(--color-background);
-  border-color: var(--color-border);
-  color: var(--color-text-primary);
-}
-
-.toolbar-btn.clear-btn:hover {
-  background: var(--color-error);
-  border-color: var(--color-error);
-  color: white;
-}
 
 .markdown-textarea {
   flex: 1;
@@ -457,7 +323,7 @@ watch(activeTab, (tab) => {
 .editor-footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   padding: var(--spacing-sm) var(--spacing-md);
   background: var(--color-surface);
   border-top: 1px solid var(--color-border);
@@ -465,13 +331,7 @@ watch(activeTab, (tab) => {
   color: var(--color-text-muted);
 }
 
-.markdown-help {
-  flex: 1;
-}
 
-.help-text {
-  color: var(--color-text-muted);
-}
 
 .character-count {
   color: var(--color-text-secondary);
@@ -652,14 +512,7 @@ watch(activeTab, (tab) => {
     justify-content: center;
   }
 
-  .toolbar {
-    flex-wrap: wrap;
-    gap: var(--spacing-xs);
-  }
 
-  .toolbar-group::after {
-    display: none;
-  }
 
   .editor-footer {
     flex-direction: column;
@@ -667,9 +520,7 @@ watch(activeTab, (tab) => {
     align-items: stretch;
   }
 
-  .markdown-help {
-    text-align: center;
-  }
+
 
   .editor-actions {
     flex-direction: column;

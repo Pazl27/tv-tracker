@@ -33,6 +33,16 @@ pub fn run() {
             remove_tv_show_rating,
             get_all_rated_movies,
             get_all_rated_tv_shows,
+            // Notes Commands
+            update_movie_notes,
+            update_tv_show_notes,
+            update_watched_movie_notes,
+            update_watched_tv_show_notes,
+            get_movie_notes,
+            get_tv_show_notes,
+            get_watched_movie_notes,
+            get_watched_tv_show_notes,
+            render_markdown_to_html,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

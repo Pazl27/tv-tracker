@@ -36,7 +36,8 @@ impl Sqlight {
                 "CREATE TABLE IF NOT EXISTS movies_to_watch (
                     id INTEGER PRIMARY KEY,
                     title TEXT NOT NULL,
-                    poster_path TEXT NOT NULL
+                    poster_path TEXT NOT NULL,
+                    notes TEXT NOT NULL DEFAULT ''
                 )",
                 [],
             )
@@ -49,7 +50,8 @@ impl Sqlight {
                     poster_path TEXT NOT NULL,
                     first_air_date TEXT NOT NULL DEFAULT '',
                     vote_average REAL NOT NULL DEFAULT 0.0,
-                    overview TEXT NOT NULL DEFAULT ''
+                    overview TEXT NOT NULL DEFAULT '',
+                    notes TEXT NOT NULL DEFAULT ''
                 )",
                 [],
             )
@@ -68,13 +70,22 @@ impl Sqlight {
                 "ALTER TABLE tv_shows_to_watch ADD COLUMN overview TEXT NOT NULL DEFAULT ''",
                 [],
             );
+            let _ = conn.execute(
+                "ALTER TABLE movies_to_watch ADD COLUMN notes TEXT NOT NULL DEFAULT ''",
+                [],
+            );
+            let _ = conn.execute(
+                "ALTER TABLE tv_shows_to_watch ADD COLUMN notes TEXT NOT NULL DEFAULT ''",
+                [],
+            );
 
             conn.execute(
                 "CREATE TABLE IF NOT EXISTS watched_movies (
                     id INTEGER PRIMARY KEY,
                     title TEXT NOT NULL,
                     poster_path TEXT NOT NULL,
-                    rating REAL CHECK(rating >= 0.5 AND rating <= 5.0) NOT NULL
+                    rating REAL CHECK(rating >= 0.5 AND rating <= 5.0) NOT NULL,
+                    notes TEXT NOT NULL DEFAULT ''
                 )",
                 [],
             )
@@ -89,7 +100,8 @@ impl Sqlight {
                     vote_average REAL NOT NULL DEFAULT 0.0,
                     overview TEXT NOT NULL DEFAULT '',
                     rating REAL CHECK(rating >= 0.5 AND rating <= 5.0) NOT NULL,
-                    watched_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+                    watched_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    notes TEXT NOT NULL DEFAULT ''
                 )",
                 [],
             )
@@ -98,6 +110,16 @@ impl Sqlight {
             // Add watched_at column to existing TV shows table if it doesn't exist
             let _ = conn.execute(
                 "ALTER TABLE watched_tv_shows ADD COLUMN watched_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP",
+                [],
+            );
+            
+            // Add notes columns to existing tables if they don't exist
+            let _ = conn.execute(
+                "ALTER TABLE watched_movies ADD COLUMN notes TEXT NOT NULL DEFAULT ''",
+                [],
+            );
+            let _ = conn.execute(
+                "ALTER TABLE watched_tv_shows ADD COLUMN notes TEXT NOT NULL DEFAULT ''",
                 [],
             );
 
@@ -123,15 +145,16 @@ impl Sqlight {
                     title TEXT NOT NULL,
                     poster_path TEXT NOT NULL,
                     rating REAL CHECK(rating >= 0.5 AND rating <= 5.0) NOT NULL,
-                    watched_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+                    watched_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    notes TEXT NOT NULL DEFAULT ''
                 )",
                 [],
             ).expect("Failed to create watched_movies table with correct constraint");
             
             // Copy back valid data with default timestamp for existing records
             let _ = conn.execute(
-                "INSERT INTO watched_movies (id, title, poster_path, rating, watched_at) 
-                 SELECT id, title, poster_path, rating, CURRENT_TIMESTAMP FROM watched_movies_temp WHERE rating >= 0.5 AND rating <= 5.0",
+                "INSERT INTO watched_movies (id, title, poster_path, rating, watched_at, notes) 
+                 SELECT id, title, poster_path, rating, CURRENT_TIMESTAMP, '' FROM watched_movies_temp WHERE rating >= 0.5 AND rating <= 5.0",
                 [],
             );
             let _ = conn.execute("DROP TABLE watched_movies_temp", []);
@@ -144,8 +167,8 @@ impl Sqlight {
 
     pub fn insert_movie_to_watch(&self, movie: &MovieToWatch) -> Result<()> {
         self.conn.execute(
-            "INSERT OR REPLACE INTO movies_to_watch (id, title, poster_path) VALUES (?1, ?2, ?3)",
-            params![movie.id, movie.title, movie.poster_path],
+            "INSERT OR REPLACE INTO movies_to_watch (id, title, poster_path, notes) VALUES (?1, ?2, ?3, ?4)",
+            params![movie.id, movie.title, movie.poster_path, movie.notes],
         )?;
         Ok(())
     }
@@ -159,12 +182,13 @@ impl Sqlight {
     pub fn get_all_movies_to_watch(&self) -> Result<Vec<MovieToWatch>> {
         let mut stmt = self
             .conn
-            .prepare("SELECT id, title, poster_path FROM movies_to_watch")?;
+            .prepare("SELECT id, title, poster_path, COALESCE(notes, '') as notes FROM movies_to_watch")?;
         let movie_iter = stmt.query_map([], |row| {
             Ok(MovieToWatch {
                 id: row.get(0)?,
                 title: row.get(1)?,
                 poster_path: row.get(2)?,
+                notes: row.get(3)?,
             })
         })?;
 
@@ -177,13 +201,14 @@ impl Sqlight {
 
     pub fn insert_watched_movie(&self, movie: &WatchedMovie) -> Result<()> {
         self.conn.execute(
-            "INSERT INTO watched_movies (id, title, poster_path, rating, watched_at) VALUES (?1, ?2, ?3, ?4, ?5)",
+            "INSERT INTO watched_movies (id, title, poster_path, rating, watched_at, notes) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
             params![
                 movie.id,
                 movie.title,
                 movie.poster_path,
                 movie.rating.to_string(),
-                movie.watched_at
+                movie.watched_at,
+                movie.notes
             ],
         )?;
         Ok(())
@@ -198,7 +223,7 @@ impl Sqlight {
     pub fn get_watched_movies(&self) -> Result<Vec<WatchedMovie>> {
         let mut stmt = self
             .conn
-            .prepare("SELECT id, title, poster_path, rating, watched_at FROM watched_movies")?;
+            .prepare("SELECT id, title, poster_path, rating, watched_at, COALESCE(notes, '') as notes FROM watched_movies")?;
         let movie_iter = stmt.query_map([], |row| {
             Ok(WatchedMovie {
                 id: row.get(0)?,
@@ -206,6 +231,7 @@ impl Sqlight {
                 poster_path: row.get(2)?,
                 rating: row.get(3)?,
                 watched_at: row.get(4)?,
+                notes: row.get(5)?,
             })
         })?;
 
@@ -218,8 +244,8 @@ impl Sqlight {
 
     pub fn insert_tv_show_to_watch(&self, tv_show: &TvShowToWatch) -> Result<()> {
         self.conn.execute(
-            "INSERT OR REPLACE INTO tv_shows_to_watch (id, name, poster_path, first_air_date, vote_average, overview) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
-            params![tv_show.id, tv_show.name, tv_show.poster_path, tv_show.first_air_date, tv_show.vote_average, tv_show.overview],
+            "INSERT OR REPLACE INTO tv_shows_to_watch (id, name, poster_path, first_air_date, vote_average, overview, notes) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+            params![tv_show.id, tv_show.name, tv_show.poster_path, tv_show.first_air_date, tv_show.vote_average, tv_show.overview, tv_show.notes],
         )?;
         Ok(())
     }
@@ -233,7 +259,7 @@ impl Sqlight {
     pub fn get_all_tv_shows_to_watch(&self) -> Result<Vec<TvShowToWatch>> {
         let mut stmt = self
             .conn
-            .prepare("SELECT id, name, poster_path, COALESCE(first_air_date, '') as first_air_date, COALESCE(vote_average, 0.0) as vote_average, COALESCE(overview, '') as overview FROM tv_shows_to_watch")?;
+            .prepare("SELECT id, name, poster_path, COALESCE(first_air_date, '') as first_air_date, COALESCE(vote_average, 0.0) as vote_average, COALESCE(overview, '') as overview, COALESCE(notes, '') as notes FROM tv_shows_to_watch")?;
         let tv_show_iter = stmt.query_map([], |row| {
             Ok(TvShowToWatch {
                 id: row.get(0)?,
@@ -242,6 +268,7 @@ impl Sqlight {
                 first_air_date: row.get(3)?,
                 vote_average: row.get(4)?,
                 overview: row.get(5)?,
+                notes: row.get(6)?,
             })
         })?;
 
@@ -255,8 +282,8 @@ impl Sqlight {
     // Rating methods for movies
     pub fn rate_movie(&self, movie: &WatchedMovie) -> Result<()> {
         self.conn.execute(
-            "INSERT OR REPLACE INTO watched_movies (id, title, poster_path, rating, watched_at) VALUES (?1, ?2, ?3, ?4, ?5)",
-            params![movie.id, movie.title, movie.poster_path, movie.rating, movie.watched_at],
+            "INSERT OR REPLACE INTO watched_movies (id, title, poster_path, rating, watched_at, notes) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+            params![movie.id, movie.title, movie.poster_path, movie.rating, movie.watched_at, movie.notes],
         )?;
         Ok(())
     }
@@ -283,7 +310,7 @@ impl Sqlight {
     pub fn get_all_rated_movies(&self) -> Result<Vec<WatchedMovie>> {
         let mut stmt = self
             .conn
-            .prepare("SELECT id, title, poster_path, rating, watched_at FROM watched_movies ORDER BY watched_at DESC")?;
+            .prepare("SELECT id, title, poster_path, rating, watched_at, COALESCE(notes, '') as notes FROM watched_movies ORDER BY watched_at DESC")?;
         let movie_iter = stmt.query_map([], |row| {
             Ok(WatchedMovie {
                 id: row.get(0)?,
@@ -291,6 +318,7 @@ impl Sqlight {
                 poster_path: row.get(2)?,
                 rating: row.get(3)?,
                 watched_at: row.get(4)?,
+                notes: row.get(5)?,
             })
         })?;
 
@@ -304,8 +332,8 @@ impl Sqlight {
     // Rating methods for TV shows
     pub fn rate_tv_show(&self, tv_show: &WatchedTvShow) -> Result<()> {
         self.conn.execute(
-            "INSERT OR REPLACE INTO watched_tv_shows (id, name, poster_path, first_air_date, vote_average, overview, rating, watched_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
-            params![tv_show.id, tv_show.name, tv_show.poster_path, tv_show.first_air_date, tv_show.vote_average, tv_show.overview, tv_show.rating, tv_show.watched_at],
+            "INSERT OR REPLACE INTO watched_tv_shows (id, name, poster_path, first_air_date, vote_average, overview, rating, watched_at, notes) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
+            params![tv_show.id, tv_show.name, tv_show.poster_path, tv_show.first_air_date, tv_show.vote_average, tv_show.overview, tv_show.rating, tv_show.watched_at, tv_show.notes],
         )?;
         Ok(())
     }
@@ -332,7 +360,7 @@ impl Sqlight {
     pub fn get_all_rated_tv_shows(&self) -> Result<Vec<WatchedTvShow>> {
         let mut stmt = self
             .conn
-            .prepare("SELECT id, name, poster_path, first_air_date, vote_average, overview, rating, watched_at FROM watched_tv_shows ORDER BY watched_at DESC")?;
+            .prepare("SELECT id, name, poster_path, first_air_date, vote_average, overview, rating, watched_at, COALESCE(notes, '') as notes FROM watched_tv_shows ORDER BY watched_at DESC")?;
         let tv_show_iter = stmt.query_map([], |row| {
             Ok(WatchedTvShow {
                 id: row.get(0)?,
@@ -343,6 +371,7 @@ impl Sqlight {
                 overview: row.get(5)?,
                 rating: row.get(6)?,
                 watched_at: row.get(7)?,
+                notes: row.get(8)?,
             })
         })?;
 
@@ -351,6 +380,92 @@ impl Sqlight {
             tv_shows.push(tv_show?);
         }
         Ok(tv_shows)
+    }
+
+    // Methods for updating notes
+    pub fn update_movie_notes(&self, movie_id: i32, notes: &str) -> Result<()> {
+        self.conn.execute(
+            "UPDATE movies_to_watch SET notes = ?1 WHERE id = ?2",
+            params![notes, movie_id],
+        )?;
+        Ok(())
+    }
+
+    pub fn update_tv_show_notes(&self, tv_show_id: i32, notes: &str) -> Result<()> {
+        self.conn.execute(
+            "UPDATE tv_shows_to_watch SET notes = ?1 WHERE id = ?2",
+            params![notes, tv_show_id],
+        )?;
+        Ok(())
+    }
+
+    pub fn update_watched_movie_notes(&self, movie_id: i32, notes: &str) -> Result<()> {
+        self.conn.execute(
+            "UPDATE watched_movies SET notes = ?1 WHERE id = ?2",
+            params![notes, movie_id],
+        )?;
+        Ok(())
+    }
+
+    pub fn update_watched_tv_show_notes(&self, tv_show_id: i32, notes: &str) -> Result<()> {
+        self.conn.execute(
+            "UPDATE watched_tv_shows SET notes = ?1 WHERE id = ?2",
+            params![notes, tv_show_id],
+        )?;
+        Ok(())
+    }
+
+    // Methods for getting notes
+    pub fn get_movie_notes(&self, movie_id: i32) -> Result<Option<String>> {
+        let mut stmt = self
+            .conn
+            .prepare("SELECT notes FROM movies_to_watch WHERE id = ?1")?;
+        let result = stmt.query_row([movie_id], |row| Ok(row.get::<_, String>(0)?));
+        
+        match result {
+            Ok(notes) => Ok(Some(notes)),
+            Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+            Err(e) => Err(e),
+        }
+    }
+
+    pub fn get_tv_show_notes(&self, tv_show_id: i32) -> Result<Option<String>> {
+        let mut stmt = self
+            .conn
+            .prepare("SELECT notes FROM tv_shows_to_watch WHERE id = ?1")?;
+        let result = stmt.query_row([tv_show_id], |row| Ok(row.get::<_, String>(0)?));
+        
+        match result {
+            Ok(notes) => Ok(Some(notes)),
+            Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+            Err(e) => Err(e),
+        }
+    }
+
+    pub fn get_watched_movie_notes(&self, movie_id: i32) -> Result<Option<String>> {
+        let mut stmt = self
+            .conn
+            .prepare("SELECT notes FROM watched_movies WHERE id = ?1")?;
+        let result = stmt.query_row([movie_id], |row| Ok(row.get::<_, String>(0)?));
+        
+        match result {
+            Ok(notes) => Ok(Some(notes)),
+            Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+            Err(e) => Err(e),
+        }
+    }
+
+    pub fn get_watched_tv_show_notes(&self, tv_show_id: i32) -> Result<Option<String>> {
+        let mut stmt = self
+            .conn
+            .prepare("SELECT notes FROM watched_tv_shows WHERE id = ?1")?;
+        let result = stmt.query_row([tv_show_id], |row| Ok(row.get::<_, String>(0)?));
+        
+        match result {
+            Ok(notes) => Ok(Some(notes)),
+            Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+            Err(e) => Err(e),
+        }
     }
 }
 

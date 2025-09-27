@@ -144,13 +144,112 @@
             </div>
           </div>
 
-          <!-- Notes Section -->
-          <NotesSection
-            v-if="tvShow"
-            :content-id="tvShow.id"
-            content-type="tv-show"
-            :content-title="tvShow.name"
+        </div>
+      </div>
+
+      <!-- Notes Section -->
+      <div v-if="tvShow" class="notes-section">
+        <div class="section-header">
+          <h3 class="section-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="16" y1="13" x2="8" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="16" y1="17" x2="8" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <polyline points="10,9 9,9 8,9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            My Notes
+          </h3>
+
+          <div class="section-actions" v-if="!isEditingNotes">
+            <button
+              @click="startEditingNotes"
+              class="action-btn edit-btn"
+              :title="hasNotes ? 'Edit notes' : 'Add notes'"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11 4H4C2.89543 4 2 4.89543 2 6V20C2 21.1046 2.89543 22 4 22H18C19.1046 22 20 21.1046 20 20V13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M18.5 2.50023C18.8978 2.1024 19.4374 1.87891 20 1.87891C20.5626 1.87891 21.1022 2.1024 21.5 2.50023C21.8978 2.89805 22.1213 3.43762 22.1213 4.00023C22.1213 4.56284 21.8978 5.1024 21.5 5.50023L12 15.0002L8 16.0002L9 12.0002L18.5 2.50023Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              {{ hasNotes ? 'Edit' : 'Add Notes' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div v-if="isNotesLoading" class="loading-state">
+          <div class="loading-spinner"></div>
+          <p>Loading notes...</p>
+        </div>
+
+        <!-- Error State -->
+        <div v-else-if="notesError" class="error-state">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+            <line x1="15" y1="9" x2="9" y2="15" stroke="currentColor" stroke-width="2"/>
+            <line x1="9" y1="9" x2="15" y2="15" stroke="currentColor" stroke-width="2"/>
+          </svg>
+          <h4>Failed to load notes</h4>
+          <p>{{ notesError }}</p>
+          <button @click="loadNotes" class="retry-btn">Try Again</button>
+        </div>
+
+        <!-- Edit Mode -->
+        <div v-else-if="isEditingNotes" class="edit-mode">
+          <MarkdownEditor
+            v-model="editingNotes"
+            :title="`Notes for ${tvShow.name}`"
+            :placeholder="notesPlaceholder"
+            :max-length="5000"
+            :show-actions="true"
+            :save-button-text="hasNotes ? 'Update Notes' : 'Save Notes'"
+            @save="saveNotes"
+            @cancel="cancelEditingNotes"
           />
+        </div>
+
+        <!-- Display Mode -->
+        <div v-else class="display-mode">
+          <!-- Empty State -->
+          <div v-if="!hasNotes" class="empty-notes">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <h4>No notes yet</h4>
+            <p>Add your personal notes, thoughts, or reminders about {{ tvShow.name }}.</p>
+            <button @click="startEditingNotes" class="add-notes-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Add Notes
+            </button>
+          </div>
+
+          <!-- Rendered Notes -->
+          <div v-else class="notes-display">
+            <div class="notes-content" v-html="renderedNotes"></div>
+            <div class="notes-meta">
+              <span class="last-updated">Last updated: {{ formatNoteDate(notesLastUpdated) }}</span>
+              <div class="notes-actions">
+                <button @click="startEditingNotes" class="action-btn small edit-btn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M11 4H4C2.89543 4 2 4.89543 2 6V20C2 21.1046 2.89543 22 4 22H18C19.1046 22 20 21.1046 20 20V13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M18.5 2.50023C18.8978 2.1024 19.4374 1.87891 20 1.87891C20.5626 1.87891 21.1022 2.1024 21.5 2.50023C21.8978 2.89805 22.1213 3.43762 22.1213 4.00023C22.1213 4.56284 21.8978 5.1024 21.5 5.50023L12 15.0002L8 16.0002L9 12.0002L18.5 2.50023Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  Edit
+                </button>
+                <button @click="clearNotes" class="action-btn small delete-btn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <polyline points="3,6 5,6 21,6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M19,6V20C19,21.1046 18.1046,22 17,22H7C5.89543,22 5,21.1046 5,20V6M8,6V4C8,2.89543 8.89543,2 10,2H14C15.1046,2 16,2.89543 16,4V6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  Clear
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -170,24 +269,41 @@
 </template>
 
 <script setup lang="ts">
-import NotesSection from '../components/NotesSection.vue';
+import MarkdownEditor from '../components/MarkdownEditor.vue';
 import StarRating from '../components/StarRating.vue';
 import { useToast } from '../composables/useToast';
 import { getTvShowDetails } from '../services/tmdbService';
 import { useRatingStore } from '../stores/ratingStore';
 import { useWatchlistStore } from '../stores/watchlistStore';
 import { invoke } from '@tauri-apps/api/core';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 const tvShow = ref<any>(null);
 const loading = ref(true);
 const currentRating = ref(0);
+
+// Notes reactive state
+const notes = ref('');
+const editingNotes = ref('');
+const renderedNotes = ref('');
+const isEditingNotes = ref(false);
+const isNotesLoading = ref(false);
+const isSavingNotes = ref(false);
+const notesError = ref('');
+const notesLastUpdated = ref<Date | null>(null);
+
 const route = useRoute();
 const router = useRouter();
 const { isTvShowInWatchlist, addTvShowToWatchlist, removeTvShowFromWatchlist } = useWatchlistStore();
 const { getTvShowRating, rateTvShow, removeTvShowRating } = useRatingStore();
 const { success, error } = useToast();
+
+// Notes computed properties
+const hasNotes = computed(() => notes.value.trim().length > 0);
+const notesPlaceholder = computed(() => {
+  return `Write your thoughts about this TV show...\n\n**What did you think?**\n- Great story\n- Amazing performances\n- Would watch again\n\n*Use markdown for formatting!*`
+});
 
 const fetchTvShow = async (showId: number) => {
   try {
@@ -202,6 +318,115 @@ const fetchTvShow = async (showId: number) => {
   } finally {
     loading.value = false;
   }
+};
+
+// Notes methods
+const loadNotes = async () => {
+  if (isNotesLoading.value || !tvShow.value) return;
+
+  isNotesLoading.value = true;
+  notesError.value = '';
+
+  try {
+    const result = await invoke('get_tv_show_notes', { tvShowId: tvShow.value.id }) as string | null;
+    notes.value = result || '';
+
+    if (notes.value) {
+      await renderNotes();
+      notesLastUpdated.value = new Date(); // In a real app, this would come from the backend
+    }
+  } catch (err) {
+    console.error('Failed to load notes:', err);
+    notesError.value = 'Failed to load notes. Please try again.';
+  } finally {
+    isNotesLoading.value = false;
+  }
+};
+
+const renderNotes = async () => {
+  if (!notes.value.trim()) {
+    renderedNotes.value = '';
+    return;
+  }
+
+  try {
+    const html = await invoke('render_markdown_to_html', {
+      markdown: notes.value
+    }) as string;
+    renderedNotes.value = html;
+  } catch (err) {
+    console.error('Failed to render notes:', err);
+    renderedNotes.value = `<p style="color: var(--color-error);">Failed to render notes</p>`;
+  }
+};
+
+const startEditingNotes = () => {
+  editingNotes.value = notes.value;
+  isEditingNotes.value = true;
+};
+
+const cancelEditingNotes = () => {
+  editingNotes.value = '';
+  isEditingNotes.value = false;
+};
+
+const saveNotes = async (newNotes: string) => {
+  if (isSavingNotes.value || !tvShow.value) return;
+
+  isSavingNotes.value = true;
+
+  try {
+    await invoke('update_tv_show_notes', {
+      tvShowId: tvShow.value.id,
+      notes: newNotes
+    });
+
+    notes.value = newNotes;
+    notesLastUpdated.value = new Date();
+    isEditingNotes.value = false;
+
+    if (newNotes.trim()) {
+      await renderNotes();
+      success('Notes Saved', 'Your notes have been saved successfully');
+    } else {
+      renderedNotes.value = '';
+      success('Notes Cleared', 'Your notes have been cleared');
+    }
+  } catch (err) {
+    console.error('Failed to save notes:', err);
+    error('Save Failed', 'Failed to save your notes. Please try again.');
+  } finally {
+    isSavingNotes.value = false;
+  }
+};
+
+const clearNotes = async () => {
+  if (!confirm('Are you sure you want to clear all notes? This action cannot be undone.')) {
+    return;
+  }
+
+  await saveNotes('');
+};
+
+const formatNoteDate = (date: Date | null) => {
+  if (!date) return 'Unknown';
+
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins} minute${diffMins === 1 ? '' : 's'} ago`;
+  if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
+  if (diffDays < 7) return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
 };
 
 const goBack = () => {
@@ -325,6 +550,13 @@ onMounted(() => {
     loading.value = false;
   }
 });
+
+// Watch for tvShow changes to load notes
+watch(tvShow, (newTvShow) => {
+  if (newTvShow) {
+    loadNotes();
+  }
+}, { immediate: false });
 </script>
 
 <style scoped>
@@ -787,6 +1019,271 @@ onMounted(() => {
     flex: 1;
     padding: var(--spacing-sm) var(--spacing-md);
     font-size: 0.875rem;
+  }
+}
+
+/* Notes Section Styles */
+.notes-section {
+  background: var(--color-surface);
+  border-radius: var(--radius-large);
+  border: 1px solid var(--color-border);
+  padding: var(--spacing-xl);
+  margin: var(--spacing-xl) var(--spacing-xl) 0;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-lg);
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin: 0;
+}
+
+.section-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.action-btn {
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.action-btn:hover {
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+}
+
+.action-btn.small {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: 0.8125rem;
+}
+
+.action-btn.edit-btn {
+  color: var(--color-primary);
+}
+
+.action-btn.delete-btn {
+  color: var(--color-error);
+}
+
+.action-btn.delete-btn:hover {
+  background: var(--color-error-background);
+}
+
+.loading-state, .error-state, .empty-notes {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--color-border);
+  border-top: 3px solid var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: var(--spacing-md);
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-state svg, .empty-notes svg {
+  margin-bottom: var(--spacing-md);
+  color: var(--color-text-tertiary);
+}
+
+.error-state h4, .empty-notes h4 {
+  font-size: 1.125rem;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.error-state p, .empty-notes p {
+  margin: 0 0 var(--spacing-lg) 0;
+}
+
+.retry-btn, .add-notes-btn {
+  background: var(--color-primary);
+  color: var(--color-primary-text);
+  border: none;
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.retry-btn:hover, .add-notes-btn:hover {
+  background: var(--color-primary-hover);
+}
+
+.edit-mode {
+  margin-top: var(--spacing-md);
+}
+
+.display-mode {
+  margin-top: var(--spacing-md);
+}
+
+.notes-display {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.notes-content {
+  padding: var(--spacing-lg);
+  background: var(--color-background);
+}
+
+.notes-content :deep(h1), .notes-content :deep(h2), .notes-content :deep(h3), .notes-content :deep(h4), .notes-content :deep(h5), .notes-content :deep(h6) {
+  color: var(--color-text-primary);
+  font-weight: 600;
+  margin: 0 0 var(--spacing-md) 0;
+  line-height: 1.4;
+}
+
+.notes-content :deep(h1) {
+  font-size: 1.5rem;
+  border-bottom: 2px solid var(--color-border);
+  padding-bottom: var(--spacing-sm);
+}
+
+.notes-content :deep(h2) {
+  font-size: 1.25rem;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: var(--spacing-xs);
+}
+
+.notes-content :deep(h3) {
+  font-size: 1.125rem;
+}
+
+.notes-content :deep(p) {
+  margin: 0 0 var(--spacing-md) 0;
+}
+
+.notes-content :deep(ul), .notes-content :deep(ol) {
+  margin: 0 0 var(--spacing-md) 0;
+  padding-left: var(--spacing-lg);
+}
+
+.notes-content :deep(li) {
+  margin-bottom: var(--spacing-xs);
+}
+
+.notes-content :deep(strong) {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.notes-content :deep(em) {
+  font-style: italic;
+  color: var(--color-text-secondary);
+}
+
+.notes-content :deep(a) {
+  color: var(--color-primary);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s ease;
+}
+
+.notes-content :deep(a:hover) {
+  border-bottom-color: var(--color-primary);
+}
+
+.notes-content :deep(code) {
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  padding: 0.125rem 0.25rem;
+  border-radius: var(--radius-sm);
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  font-size: 0.875em;
+}
+
+.notes-content :deep(blockquote) {
+  border-left: 4px solid var(--color-primary);
+  margin: var(--spacing-md) 0;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+}
+
+.notes-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  font-size: 0.875rem;
+  color: var(--color-text-tertiary);
+}
+
+.notes-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+@media (max-width: 768px) {
+  .notes-section {
+    margin: var(--spacing-lg) var(--spacing-md) 0;
+  }
+  
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+  }
+
+  .notes-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+
+  .notes-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .loading-state, .error-state, .empty-notes {
+    padding: var(--spacing-lg);
   }
 }
 </style>
