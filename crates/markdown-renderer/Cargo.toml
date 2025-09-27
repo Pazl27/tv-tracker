@@ -3,8 +3,40 @@ name = "markdown-renderer"
 authors.workspace = true
 edition.workspace = true
 version.workspace = true
-description.workspace = true
+description = "A fast and robust Markdown parser with AST generation and HTML rendering capabilities"
+licence.workspace = true
+repository = "https://github.com/Pazl27/tv-tracker"
+readme = "README.md"
+keywords = ["markdown", "parser", "html", "ast", "renderer"]
+categories = ["parsing", "text-processing", "web-programming"]
+rust-version.workspace = true
+
+[features]
+default = ["html"]
+# HTML rendering capabilities with proper escaping and formatting
+html = []
+# Enables all available features
+full = ["html"]
 
 [dependencies]
 thiserror.workspace = true
-anyhow.workspace = true
+
+# For development and testing, we can enable all features by default
+[dev-dependencies]
+
+# Test with all features in dev builds
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+# Package metadata for better discoverability
+[package.metadata]
+msrv = "1.70"
+
+[[example]]
+name = "parse_markdown"
+required-features = []
+
+[[example]]
+name = "html_rendering"
+required-features = ["html"]

@@ -60,6 +60,21 @@ pub enum ParseError {
         line: usize,
         column: usize
     },
+
+    #[error("Invalid emphasis level {0}")]
+    InvalidEmphasis(u8),
+
+    #[error("Expected URL in link")]
+    ExpectedUrl,
+
+    #[error("Expected token {expected} but found {found}")]
+    ExpectedToken {
+        expected: String,
+        found: String,
+    },
+
+    #[error("Unexpected end of input")]
+    UnexpectedEndOfInput,
 }
 
 // General error type for the entire markdown renderer
