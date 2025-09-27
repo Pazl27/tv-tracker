@@ -3,7 +3,7 @@
     <div class="rating-popup" @click.stop>
       <div class="popup-header">
         <h3 class="popup-title">Rate {{ contentType }}</h3>
-        <button @click="closePopup" class="close-button">
+        <button class="close-button" @click="closePopup">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
@@ -13,10 +13,12 @@
       <div class="popup-content">
         <!-- Content Info -->
         <div class="content-info">
-          <img :src="content.poster_url || `https://image.tmdb.org/t/p/w200${content.poster_path}`" 
-               :alt="content.title || content.name" 
-               class="content-poster"
-               @error="handleImageError" />
+          <img 
+            :src="content.poster_url || `https://image.tmdb.org/t/p/w200${content.poster_path}`"
+            :alt="content.title || content.name"
+            class="content-poster"
+            @error="handleImageError" 
+          />
           <div class="content-details">
             <h4 class="content-title">{{ content.title || content.name }}</h4>
             <p class="content-year">
@@ -30,10 +32,10 @@
           <label class="section-label">Your Rating</label>
           <StarRating
             v-model="rating"
-            @change="handleRatingChange"
             :show-rating-text="true"
             :show-clear-button="false"
             size="large"
+            @change="handleRatingChange"
           />
         </div>
 
@@ -54,8 +56,8 @@
               <label for="watch-time" class="input-label">Time (optional)</label>
               <input
                 id="watch-time"
-                type="time"
                 v-model="watchTime"
+                type="time"
                 class="time-input"
               />
             </div>
@@ -64,15 +66,19 @@
 
         <!-- Quick Date Buttons -->
         <div class="quick-dates">
-          <button @click="setQuickDate('today')" class="quick-date-btn">Today</button>
-          <button @click="setQuickDate('yesterday')" class="quick-date-btn">Yesterday</button>
-          <button @click="setQuickDate('week')" class="quick-date-btn">This Week</button>
+          <button class="quick-date-btn" @click="setQuickDate('today')">Today</button>
+          <button class="quick-date-btn" @click="setQuickDate('yesterday')">Yesterday</button>
+          <button class="quick-date-btn" @click="setQuickDate('week')">This Week</button>
         </div>
 
         <!-- Action Buttons -->
         <div class="popup-actions">
-          <button @click="closePopup" class="action-btn secondary">Cancel</button>
-          <button @click="saveRating" :disabled="!rating || rating === 0" class="action-btn primary">
+          <button class="action-btn secondary" @click="closePopup">Cancel</button>
+          <button 
+            :disabled="!rating || rating === 0" 
+            class="action-btn primary" 
+            @click="saveRating"
+          >
             {{ existingRating ? 'Update Rating' : 'Save Rating' }}
           </button>
         </div>
@@ -82,10 +88,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
-import StarRating from './StarRating.vue'
 import DatePicker from './DatePicker.vue'
+import StarRating from './StarRating.vue'
 import { formatDateToLocal, getTodayString } from '../utils/dateUtils'
+import { ref, computed, watch, onMounted } from 'vue'
 
 interface Props {
   isVisible: boolean
@@ -139,24 +145,27 @@ const getYear = (dateString: string) => {
 
 const setQuickDate = (period: string) => {
   const now = new Date()
-  
+
   switch (period) {
-    case 'today':
+    case 'today': {
       watchDate.value = formatDateToLocal(now)
       watchTime.value = now.toTimeString().slice(0, 5)
       break
-    case 'yesterday':
+    }
+    case 'yesterday': {
       const yesterday = new Date(now)
       yesterday.setDate(yesterday.getDate() - 1)
       watchDate.value = formatDateToLocal(yesterday)
       watchTime.value = '20:00' // Default evening time
       break
-    case 'week':
+    }
+    case 'week': {
       const weekAgo = new Date(now)
       weekAgo.setDate(weekAgo.getDate() - 7)
       watchDate.value = formatDateToLocal(weekAgo)
       watchTime.value = '20:00'
       break
+    }
   }
 }
 
@@ -165,7 +174,7 @@ const saveRating = () => {
 
   // Combine date and time into ISO string
   let watchedAt: string
-  
+
   if (watchDate.value) {
     if (watchTime.value) {
       watchedAt = new Date(`${watchDate.value}T${watchTime.value}`).toISOString()
@@ -187,7 +196,7 @@ watch(() => props.isVisible, (isVisible) => {
   if (isVisible) {
     // Reset or load existing data
     rating.value = props.existingRating || 0
-    
+
     if (props.existingWatchedAt) {
       const existingDate = new Date(props.existingWatchedAt)
       watchDate.value = formatDateToLocal(existingDate)
@@ -428,13 +437,13 @@ onMounted(() => {
     background: #1f2937;
     border-color: #374151;
   }
-  
+
   .time-input {
     background: #111827;
     border-color: #374151;
     color: #f9fafb;
   }
-  
+
   .time-input:focus {
     border-color: #3b82f6;
   }
@@ -447,15 +456,15 @@ onMounted(() => {
     border-radius: 16px 16px 0 0;
     max-height: 80vh;
   }
-  
+
   .datetime-inputs {
     grid-template-columns: 1fr;
   }
-  
+
   .popup-actions {
     flex-direction: column;
   }
-  
+
   .action-btn {
     width: 100%;
   }

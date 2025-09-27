@@ -18,24 +18,20 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed, watch } from 'vue';
-import { invoke } from "@tauri-apps/api/core";
-import { useRoute, useRouter } from 'vue-router';
 import TabBar from '../components/TabBar.vue';
 import WatchlistMovieGrid from '../components/watchlist/WatchlistMovieGrid.vue';
 import WatchlistTvShowGrid from '../components/watchlist/WatchlistTvShowGrid.vue';
-import { searchMovies, searchShows } from '../services/tmdbService';
 import { useWatchlistStore } from '../stores/watchlistStore';
+import { ref, onMounted, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
 const router = useRouter();
 const activeSubTab = ref('movies');
 const searchQuery = ref('');
-const showDebug = ref(true); // Enable debugging
 
 // Use the watchlist store
 const {
-  watchlistMovies,
   watchlistTvShows,
   isLoadingMovies,
   isLoadingTvShows,
@@ -71,7 +67,7 @@ const handleSearchInput = (query: string) => {
   }
 };
 
-const searchMoviesHandler = async (query: string) => {
+const searchMoviesHandler = async (_query: string) => {
   try {
     // This searches all movies, not just watchlist
     // The component will filter the watchlist based on searchQuery
@@ -80,7 +76,7 @@ const searchMoviesHandler = async (query: string) => {
   }
 };
 
-const searchTvShowsHandler = async (query: string) => {
+const searchTvShowsHandler = async (_query: string) => {
   try {
     // This searches all TV shows, not just watchlist
     // The component will filter the watchlist based on searchQuery

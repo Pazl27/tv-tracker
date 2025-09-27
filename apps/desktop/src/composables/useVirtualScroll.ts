@@ -4,7 +4,6 @@ export interface VirtualScrollOptions {
   itemHeight: number
   containerHeight?: number
   overscan?: number
-  threshold?: number
 }
 
 export const useVirtualScroll = <T>(
@@ -14,8 +13,7 @@ export const useVirtualScroll = <T>(
   const {
     itemHeight,
     containerHeight = 600,
-    overscan = 5,
-    threshold = 0.1
+    overscan = 5
   } = options
 
   // Refs
@@ -24,7 +22,7 @@ export const useVirtualScroll = <T>(
   const isScrolling = ref(false)
   const clientHeight = ref(containerHeight)
 
-  let scrollEndTimer: NodeJS.Timeout | null = null
+  let scrollEndTimer: number | null = null
 
   // Computed values
   const totalHeight = computed(() => items.value.length * itemHeight)
@@ -123,7 +121,7 @@ export const useVirtualScroll = <T>(
     
     if (containerRef.value) {
       clientHeight.value = containerRef.value.clientHeight
-      resizeObserver = setupResizeObserver()
+      resizeObserver = setupResizeObserver() || null
     }
   })
 
@@ -170,7 +168,7 @@ export const useInfiniteScroll = <T>(
     hasMore?: Ref<boolean>
     isLoading?: Ref<boolean>
     loadMoreThreshold?: number
-  } = {}
+  }
 ) => {
   const {
     hasMore = ref(true),

@@ -38,8 +38,8 @@
           <div class="poster-container">
             <img :src="movie.poster_url" :alt="movie.title" class="movie-poster" />
             <div class="poster-actions">
-              <button 
-                class="action-btn primary" 
+              <button
+                class="action-btn primary"
                 @click="toggleWatchlist"
                 :class="{ 'in-watchlist': movie && isMovieInWatchlist(movie.id) }"
               >
@@ -160,6 +160,14 @@
             </div>
           </div>
         </div>
+
+        <!-- Notes Section -->
+        <NotesSection
+          v-if="movie"
+          :content-id="movie.id"
+          content-type="movie"
+          :content-title="movie.title"
+        />
       </div>
     </div>
 
@@ -189,15 +197,16 @@
 </template>
 
 <script setup lang="ts">
+import NotesSection from '../components/NotesSection.vue';
+import RatingPopup from '../components/RatingPopup.vue';
+import StarRating from '../components/StarRating.vue';
+import { useToast } from '../composables/useToast';
+import { getMovieDetails } from '../services/tmdbService';
+import { useRatingStore } from '../stores/ratingStore';
+import { useWatchlistStore } from '../stores/watchlistStore';
+import { invoke } from '@tauri-apps/api/core';
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { getMovieDetails } from '../services/tmdbService';
-import { invoke } from '@tauri-apps/api/core';
-import { useWatchlistStore } from '../stores/watchlistStore';
-import { useRatingStore } from '../stores/ratingStore';
-import { useToast } from '../composables/useToast';
-import StarRating from '../components/StarRating.vue';
-import RatingPopup from '../components/RatingPopup.vue';
 
 const movie = ref<any>(null);
 const loading = ref(true);
@@ -214,7 +223,7 @@ const fetchMovie = async (movieId: number) => {
   try {
     loading.value = true;
     movie.value = await getMovieDetails(invoke, movieId);
-    
+
     // Load existing rating if any
     const existingRating = getMovieRating.value(movieId);
     currentRating.value = existingRating;
@@ -228,11 +237,11 @@ const fetchMovie = async (movieId: number) => {
 const goBack = () => {
   // Get navigation context from localStorage
   const contextStr = localStorage.getItem('movieNavigationContext');
-  
+
   if (contextStr) {
     try {
       const context = JSON.parse(contextStr);
-      
+
       if (context.from === 'watchlist') {
         router.push({
           path: '/watchlist',
@@ -246,7 +255,7 @@ const goBack = () => {
       } else {
         router.go(-1);
       }
-      
+
       // Clean up the context after use
       localStorage.removeItem('movieNavigationContext');
     } catch (error) {
@@ -260,7 +269,7 @@ const goBack = () => {
 
 const toggleWatchlist = async () => {
   if (!movie.value) return;
-  
+
   try {
     if (isMovieInWatchlist(movie.value.id)) {
       await removeMovieFromWatchlist(movie.value);
@@ -277,7 +286,7 @@ const toggleWatchlist = async () => {
 
 const shareMovie = () => {
   if (!movie.value) return;
-  
+
   if (navigator.share) {
     navigator.share({
       title: movie.value.title,
@@ -316,7 +325,7 @@ const closeRatingPopup = () => {
 
 const handleRatingSave = async (data: { rating: number; watchedAt: string }) => {
   if (!movie.value) return;
-  
+
   try {
     await rateMovie(movie.value, data.rating, data.watchedAt);
     currentRating.value = data.rating;
@@ -331,7 +340,7 @@ const handleRatingSave = async (data: { rating: number; watchedAt: string }) => 
 
 const handleRatingClear = async () => {
   if (!movie.value) return;
-  
+
   try {
     await removeMovieRating(movie.value.id);
     currentRating.value = 0;
@@ -792,7 +801,7 @@ onMounted(() => {
     grid-template-columns: 250px 1fr;
     gap: var(--spacing-xl);
   }
-  
+
   .movie-title {
     font-size: 2.5rem;
   }
@@ -804,31 +813,31 @@ onMounted(() => {
     gap: var(--spacing-lg);
     padding: var(--spacing-lg);
   }
-  
+
   .poster-container {
     position: static;
     max-width: 300px;
     margin: 0 auto;
   }
-  
+
   .movie-title {
     font-size: 2rem;
     text-align: center;
   }
-  
+
   .movie-meta {
     justify-content: center;
   }
-  
+
   .details-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .loading-skeleton {
     grid-template-columns: 1fr;
     gap: var(--spacing-lg);
   }
-  
+
   .skeleton-poster {
     max-width: 300px;
     margin: 0 auto;
@@ -839,23 +848,23 @@ onMounted(() => {
   .movie-nav {
     padding: var(--spacing-md);
   }
-  
+
   .movie-content {
     padding: var(--spacing-md);
   }
-  
+
   .movie-title {
     font-size: 1.75rem;
   }
-  
+
   .overview-text {
     font-size: 1rem;
   }
-  
+
   .poster-actions {
     flex-direction: row;
   }
-  
+
   .action-btn {
     flex: 1;
     padding: var(--spacing-sm) var(--spacing-md);

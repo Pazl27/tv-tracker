@@ -270,13 +270,13 @@
 </template>
 
 <script setup lang="ts">
+import RatingPopup from '../components/RatingPopup.vue'
+import StarRating from '../components/StarRating.vue'
+import { useToast } from '../composables/useToast'
+import { useRatingStore } from '../stores/ratingStore'
+import { formatWatchedDate } from '../utils/dateUtils'
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useRatingStore } from '../stores/ratingStore'
-import { useToast } from '../composables/useToast'
-import StarRating from '../components/StarRating.vue'
-import RatingPopup from '../components/RatingPopup.vue'
-import { formatWatchedDate } from '../utils/dateUtils'
 
 const router = useRouter()
 const {

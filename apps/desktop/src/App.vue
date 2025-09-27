@@ -4,10 +4,10 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
 import ToastContainer from './components/ToastContainer.vue'
-import { useWatchlistStore } from './stores/watchlistStore'
 import { useRatingStore } from './stores/ratingStore'
+import { useWatchlistStore } from './stores/watchlistStore'
+import { onMounted } from 'vue'
 
 const { initializeWatchlist } = useWatchlistStore()
 const { initializeRatings } = useRatingStore()

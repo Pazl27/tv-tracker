@@ -107,8 +107,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
 import StarRating from './StarRating.vue'
+import { ref } from 'vue'
 
 const testRating = ref(0)
 const lastAction = ref('None')

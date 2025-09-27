@@ -38,8 +38,8 @@
           <div class="poster-container">
             <img :src="tvShow.poster_url" :alt="tvShow.name" class="tvshow-poster" />
             <div class="poster-actions">
-              <button 
-                class="action-btn primary" 
+              <button
+                class="action-btn primary"
                 @click="toggleWatchlist"
                 :class="{ 'in-watchlist': tvShow && isTvShowInWatchlist(tvShow.id) }"
               >
@@ -143,6 +143,14 @@
               <span class="detail-value">{{ formatRuntime(tvShow.episode_run_time[0]) }}</span>
             </div>
           </div>
+
+          <!-- Notes Section -->
+          <NotesSection
+            v-if="tvShow"
+            :content-id="tvShow.id"
+            content-type="tv-show"
+            :content-title="tvShow.name"
+          />
         </div>
       </div>
     </div>
@@ -162,14 +170,15 @@
 </template>
 
 <script setup lang="ts">
+import NotesSection from '../components/NotesSection.vue';
+import StarRating from '../components/StarRating.vue';
+import { useToast } from '../composables/useToast';
+import { getTvShowDetails } from '../services/tmdbService';
+import { useRatingStore } from '../stores/ratingStore';
+import { useWatchlistStore } from '../stores/watchlistStore';
+import { invoke } from '@tauri-apps/api/core';
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { getTvShowDetails } from '../services/tmdbService';
-import { invoke } from '@tauri-apps/api/core';
-import { useWatchlistStore } from '../stores/watchlistStore';
-import { useRatingStore } from '../stores/ratingStore';
-import { useToast } from '../composables/useToast';
-import StarRating from '../components/StarRating.vue';
 
 const tvShow = ref<any>(null);
 const loading = ref(true);
@@ -184,7 +193,7 @@ const fetchTvShow = async (showId: number) => {
   try {
     loading.value = true;
     tvShow.value = await getTvShowDetails(invoke, showId);
-    
+
     // Load existing rating if any
     const existingRating = getTvShowRating.value(showId);
     currentRating.value = existingRating;
@@ -198,11 +207,11 @@ const fetchTvShow = async (showId: number) => {
 const goBack = () => {
   // Get navigation context from localStorage
   const contextStr = localStorage.getItem('tvShowNavigationContext');
-  
+
   if (contextStr) {
     try {
       const context = JSON.parse(contextStr);
-      
+
       if (context.from === 'watchlist') {
         router.push({
           path: '/watchlist',
@@ -216,7 +225,7 @@ const goBack = () => {
       } else {
         router.go(-1);
       }
-      
+
       // Clean up the context after use
       localStorage.removeItem('tvShowNavigationContext');
     } catch (error) {
@@ -230,7 +239,7 @@ const goBack = () => {
 
 const toggleWatchlist = async () => {
   if (!tvShow.value) return;
-  
+
   try {
     if (isTvShowInWatchlist(tvShow.value.id)) {
       await removeTvShowFromWatchlist(tvShow.value);
@@ -247,7 +256,7 @@ const toggleWatchlist = async () => {
 
 const shareShow = () => {
   if (!tvShow.value) return;
-  
+
   if (navigator.share) {
     navigator.share({
       title: tvShow.value.name,
@@ -281,7 +290,7 @@ const formatRuntime = (minutes: number) => {
 
 const handleRatingChange = async (rating: number) => {
   if (!tvShow.value) return;
-  
+
   try {
     await rateTvShow(tvShow.value, rating);
     currentRating.value = rating;
@@ -296,7 +305,7 @@ const handleRatingChange = async (rating: number) => {
 
 const handleRatingClear = async () => {
   if (!tvShow.value) return;
-  
+
   try {
     await removeTvShowRating(tvShow.value.id);
     currentRating.value = 0;
@@ -710,7 +719,7 @@ onMounted(() => {
     grid-template-columns: 250px 1fr;
     gap: var(--spacing-xl);
   }
-  
+
   .tvshow-title {
     font-size: 2.5rem;
   }
@@ -722,31 +731,31 @@ onMounted(() => {
     gap: var(--spacing-lg);
     padding: var(--spacing-lg);
   }
-  
+
   .poster-container {
     position: static;
     max-width: 300px;
     margin: 0 auto;
   }
-  
+
   .tvshow-title {
     font-size: 2rem;
     text-align: center;
   }
-  
+
   .tvshow-meta {
     justify-content: center;
   }
-  
+
   .details-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .loading-skeleton {
     grid-template-columns: 1fr;
     gap: var(--spacing-lg);
   }
-  
+
   .skeleton-poster {
     max-width: 300px;
     margin: 0 auto;
@@ -757,23 +766,23 @@ onMounted(() => {
   .tvshow-nav {
     padding: var(--spacing-md);
   }
-  
+
   .tvshow-content {
     padding: var(--spacing-md);
   }
-  
+
   .tvshow-title {
     font-size: 1.75rem;
   }
-  
+
   .overview-text {
     font-size: 1rem;
   }
-  
+
   .poster-actions {
     flex-direction: row;
   }
-  
+
   .action-btn {
     flex: 1;
     padding: var(--spacing-sm) var(--spacing-md);

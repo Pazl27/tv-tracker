@@ -1,5 +1,5 @@
-import { ref, computed } from 'vue'
 import { invoke } from '@tauri-apps/api/core'
+import { ref, computed } from 'vue'
 
 interface RatedMovie {
   id: number

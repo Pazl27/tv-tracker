@@ -83,14 +83,12 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, watch } from 'vue';
-import { invoke } from "@tauri-apps/api/core";
-import { fetchTvShows } from '../../services/tmdbService';
-import { defineProps } from 'vue';
-import { useWatchlistStore } from '../../stores/watchlistStore';
 import { useToast } from '../../composables/useToast';
+import { fetchTvShows } from '../../services/tmdbService';
+import { useWatchlistStore } from '../../stores/watchlistStore';
+import { invoke } from "@tauri-apps/api/core";
+import { ref, onMounted, watch, defineProps } from 'vue';
 import { useRouter } from 'vue-router';
-import LazyImage from '../LazyImage.vue';
 
 const props = defineProps<{ searchedTvShows: any[] }>();
 
@@ -102,11 +100,11 @@ const { isTvShowInWatchlist, addTvShowToWatchlist, removeTvShowFromWatchlist } =
 const { success, error } = useToast();
 
 // Image event handlers
-const onImageLoad = (event: Event) => {
+const onImageLoad = (_event: Event) => {
   // Optional: handle successful image loads
 };
 
-const onImageError = (event: Event) => {
+const onImageError = (_event: Event) => {
   // Optional: handle image load errors
 };
 

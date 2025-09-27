@@ -20,15 +20,15 @@
             v-model="searchQuery"
             type="text"
             placeholder="Search movies and TV shows..."
+            class="search-input"
             @keydown.enter="onSearchInput"
             @input="onSearchInput"
-            class="search-input"
           />
-          <button 
-            v-if="searchQuery" 
-            @click="clearSearch"
-            class="clear-button"
+          <button
+            v-if="searchQuery"
             type="button"
+            class="clear-button"
+            @click="clearSearch"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -61,14 +61,14 @@
           <span>TV Shows</span>
         </button>
       </div>
-      
+
       <div class="tab-indicator" :class="{ 'tab-indicator--tv': activeSubTab === 'tvShows' }"></div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { defineProps, defineEmits, ref } from 'vue';
+import { defineEmits, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const emit = defineEmits<{
@@ -76,8 +76,10 @@ const emit = defineEmits<{
   (e: 'search-input', query: string): void;
 }>();
 
-const props = defineProps({
-  activeSubTab: String,
+withDefaults(defineProps<{
+  activeSubTab?: string;
+}>(), {
+  activeSubTab: 'movies'
 });
 
 const searchQuery = ref('');

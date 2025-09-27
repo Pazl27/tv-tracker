@@ -1,11 +1,11 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import RatingTest from '../components/RatingTest.vue';
 import HomePage from '../views/HomePage.vue';
-import PopularPage from '../views/PopularPage.vue';
-import WatchlistPage from '../views/WatchlistPage.vue';
 import MovieDetailsPage from '../views/MovieDetailsPage.vue';
+import PopularPage from '../views/PopularPage.vue';
 import TvShowDetailsPage from '../views/TvShowDetailsPage.vue';
 import WatchedPage from '../views/WatchedPage.vue';
-import RatingTest from '../components/RatingTest.vue';
+import WatchlistPage from '../views/WatchlistPage.vue';
+import { createRouter, createWebHistory } from 'vue-router';
 
 const routes = [
   {
@@ -48,8 +48,8 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(),
-  routes,
+	history: createWebHistory(),
+	routes
 });
 
 export default router;

@@ -18,7 +18,7 @@
         <path d="M8 2V6M16 2V6M3 10H21M5 4H19C20.1046 4 21 4.89543 21 6V20C21 21.1046 20.1046 22 19 22H5C3.89543 22 4 21.1046 4 20V6C4 4.89543 3.89543 4 5 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </div>
-    
+
     <div v-if="isCalendarVisible" class="calendar-popup" @click.stop>
       <div class="calendar-header">
         <button @click="previousMonth" class="nav-button" type="button">
@@ -33,12 +33,12 @@
           </svg>
         </button>
       </div>
-      
+
       <div class="calendar-grid">
         <div class="weekday-headers">
           <div v-for="day in weekdays" :key="day" class="weekday-header">{{ day }}</div>
         </div>
-        
+
         <div class="days-grid">
           <button
             v-for="day in calendarDays"
@@ -60,7 +60,7 @@
           </button>
         </div>
       </div>
-      
+
       <div class="calendar-footer">
         <button @click="selectToday" class="quick-select-btn" type="button">Today</button>
         <button @click="clearDate" class="quick-select-btn clear" type="button">Clear</button>
@@ -70,8 +70,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { formatDateToLocal } from '../utils/dateUtils'
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 
 interface Props {
   modelValue?: string | Date | null
@@ -134,10 +134,10 @@ const calendarDays = computed(() => {
   const firstDay = new Date(currentYear.value, currentMonth.value, 1)
   const startDate = new Date(firstDay.getTime())
   startDate.setDate(startDate.getDate() - firstDay.getDay())
-  
+
   const days = []
   const currentDate = new Date(startDate.getTime())
-  
+
   // Generate 42 days (6 weeks)
   for (let i = 0; i < 42; i++) {
     days.push({
@@ -146,7 +146,7 @@ const calendarDays = computed(() => {
     })
     currentDate.setDate(currentDate.getDate() + 1)
   }
-  
+
   return days
 })
 
@@ -170,17 +170,17 @@ const isToday = (date: Date) => {
 
 const isDisabled = (date: Date) => {
   if (props.disabled) return true
-  
+
   if (props.maxDate) {
     const maxDate = typeof props.maxDate === 'string' ? new Date(props.maxDate) : props.maxDate
     if (date > maxDate) return true
   }
-  
+
   if (props.minDate) {
     const minDate = typeof props.minDate === 'string' ? new Date(props.minDate) : props.minDate
     if (date < minDate) return true
   }
-  
+
   return false
 }
 
@@ -206,18 +206,18 @@ const hideCalendar = () => {
 
 const selectDate = (date: Date) => {
   if (isDisabled(date)) return
-  
+
   try {
     // Create date string in local timezone to avoid timezone offset issues
     const dateString = formatDateToLocal(date)
-    
+
     // Validate the date string
     const testDate = new Date(dateString + 'T00:00:00')
     if (isNaN(testDate.getTime())) {
       console.warn('Invalid date selected:', dateString)
       return
     }
-    
+
     emit('update:modelValue', dateString)
     emit('change', dateString)
     hideCalendar()
@@ -265,20 +265,20 @@ const nextMonth = () => {
 
 const updateCalendarPosition = () => {
   if (!datePickerRef.value) return
-  
+
   try {
     // On mobile, use fixed positioning
     if (window.innerWidth <= 640) {
       calendarPosition.value = { top: '50%', bottom: 'auto' }
       return
     }
-    
+
     const rect = datePickerRef.value.getBoundingClientRect()
     const viewportHeight = window.innerHeight
     const calendarHeight = 400 // Approximate calendar height
     const spaceBelow = viewportHeight - rect.bottom - 20 // Add some padding
     const spaceAbove = rect.top - 20 // Add some padding
-    
+
     if (spaceBelow < calendarHeight && spaceAbove > calendarHeight) {
       // Show above input
       calendarPosition.value = { top: 'auto', bottom: '100%' }
@@ -537,13 +537,13 @@ onUnmounted(() => {
     border-color: #374151;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
   }
-  
+
   .date-input {
     background: #111827;
     border-color: #374151;
     color: #f9fafb;
   }
-  
+
   .date-input:focus {
     border-color: #3b82f6;
   }
@@ -579,17 +579,17 @@ onUnmounted(() => {
     max-width: 300px;
     padding: 12px;
   }
-  
+
   .day-button {
     width: 28px;
     height: 28px;
     font-size: 0.75rem;
   }
-  
+
   .calendar-header {
     margin-bottom: 12px;
   }
-  
+
   .month-year {
     font-size: 0.9rem;
   }

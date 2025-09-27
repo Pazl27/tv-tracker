@@ -13,9 +13,9 @@
 
     <!-- TV Show Cards -->
     <div v-else class="movie-grid">
-      <div 
-        v-for="show in filteredTvShows" 
-        :key="show.id" 
+      <div
+        v-for="show in filteredTvShows"
+        :key="show.id"
         class="movie-card"
         @click="goToShowDetails(show)"
       >
@@ -33,8 +33,8 @@
             @visible="onImageVisible"
           />
           <div class="movie-overlay">
-            <button 
-              class="action-button remove-button" 
+            <button
+              class="action-button remove-button"
               @click.stop="removeFromWatchlist(show)"
               title="Remove from Watchlist"
             >
@@ -58,7 +58,7 @@
             <span>Saved</span>
           </div>
         </div>
-        
+
         <div class="movie-content">
           <h3 class="movie-title">{{ show.name }}</h3>
           <p class="movie-year" v-if="show.first_air_date">
@@ -80,14 +80,12 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, watch, computed } from 'vue';
-import { invoke } from "@tauri-apps/api/core";
-import { defineProps } from 'vue';
-import { fetchShowWatchlist } from '../../services/tmdbService';
-import { useWatchlistStore } from '../../stores/watchlistStore';
 import { useToast } from '../../composables/useToast';
-import { useRouter } from 'vue-router';
+import { useWatchlistStore } from '../../stores/watchlistStore';
 import LazyImage from '../LazyImage.vue';
+import { computed } from 'vue';
+import { defineProps } from 'vue';
+import { useRouter } from 'vue-router';
 
 const props = defineProps<{ searchQuery: string }>();
 
@@ -96,11 +94,11 @@ const { watchlistTvShows, isLoadingTvShows, removeTvShowFromWatchlist } = useWat
 const { success, error } = useToast();
 
 // Image event handlers
-const onImageLoad = (event: Event) => {
+const onImageLoad = () => {
   // Optional: handle successful image loads
 };
 
-const onImageError = (event: Event) => {
+const onImageError = () => {
   // Optional: handle image load errors
 };
 
@@ -394,7 +392,7 @@ const filteredTvShows = computed(() => {
     grid-template-columns: repeat(3, 1fr);
     gap: var(--spacing-md);
   }
-  
+
   .movie-grid-container {
     padding: var(--spacing-md);
   }
@@ -405,28 +403,28 @@ const filteredTvShows = computed(() => {
     grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-sm);
   }
-  
+
   .movie-grid-container {
     padding: var(--spacing-sm);
   }
-  
+
   .movie-content {
     padding: var(--spacing-sm);
   }
-  
+
   .movie-title {
     font-size: 0.875rem;
   }
-  
+
   .movie-year {
     font-size: 0.75rem;
   }
-  
+
   .action-button {
     width: 36px;
     height: 36px;
   }
-  
+
   .action-button svg {
     width: 16px;
     height: 16px;

@@ -1,5 +1,5 @@
-import { ref, computed } from 'vue'
 import { invoke } from '@tauri-apps/api/core'
+import { ref, computed } from 'vue'
 
 interface Movie {
   id: number
@@ -119,9 +119,7 @@ export const useWatchlistStore = () => {
           poster_url: `https://image.tmdb.org/t/p/w500${show.poster_path}`,
         }
         watchlistTvShows.value.push(showWithPosterUrl)
-      } else {
       }
-
       return true
     } catch (error) {
       console.error('Failed to add TV show to watchlist:', error)
@@ -156,9 +154,7 @@ export const useWatchlistStore = () => {
       const index = watchlistTvShows.value.findIndex(s => s.id === show.id)
       if (index > -1) {
         watchlistTvShows.value.splice(index, 1)
-      } else {
       }
-
       return true
     } catch (error) {
       console.error('Failed to remove TV show from watchlist:', error)

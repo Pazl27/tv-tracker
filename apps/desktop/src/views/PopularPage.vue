@@ -1,19 +1,19 @@
 <template>
   <div>
-    <TabBar :activeTab="activeTab" :activeSubTab="activeSubTab" @tab-switched="switchTab" @sub-tab-switched="switchSubTab" @search-input="handleSearchInput" />
-    <MovieGrid v-if="activeSubTab === 'movies'" :key="movieGridKey" :searchedMovies="movies" />
-    <TvShowGrid v-if="activeSubTab === 'tvShows'" :searchedTvShows="tvShows" />
+    <TabBar :active-tab="activeTab" :active-sub-tab="activeSubTab" @tab-switched="switchTab" @sub-tab-switched="switchSubTab" @search-input="handleSearchInput" />
+    <MovieGrid v-if="activeSubTab === 'movies'" :key="movieGridKey" :searched-movies="movies" />
+    <TvShowGrid v-if="activeSubTab === 'tvShows'" :searched-tv-shows="tvShows" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
-import { invoke } from "@tauri-apps/api/core";
-import { useRoute, useRouter } from 'vue-router';
+import TabBar from '../components/TabBar.vue';
 import MovieGrid from '../components/popular/MovieGrid.vue';
 import TvShowGrid from '../components/popular/TvShowGrid.vue';
-import TabBar from '../components/TabBar.vue';
 import { searchMovies, searchShows } from '../services/tmdbService';
+import { invoke } from "@tauri-apps/api/core";
+import { ref, watch, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
 const router = useRouter();
@@ -21,8 +21,8 @@ const activeTab = ref('popular');
 const activeSubTab = ref('movies');
 const movieGridKey = ref(0);
 const searchQuery = ref('');
-const movies = ref([]);
-const tvShows = ref([]);
+const movies = ref<any[]>([]);
+const tvShows = ref<any[]>([]);
 
 const switchTab = (tab: string) => {
   activeTab.value = tab;
@@ -64,7 +64,7 @@ const handleSearchInput = (query: string) => {
 
 const searchMoviesHandler = async (query: string) => {
   try {
-    movies.value = await searchMovies(invoke, query);
+    movies.value = await searchMovies(invoke, query) as any[];
   } catch (error) {
     console.error('Failed to search movies:', error);
   }
@@ -72,7 +72,7 @@ const searchMoviesHandler = async (query: string) => {
 
 const searchTvShowsHandler = async (query: string) => {
   try {
-    tvShows.value = await searchShows(invoke, query);
+    tvShows.value = await searchShows(invoke, query) as any[];
   } catch (error) {
     console.error('Failed to search TV shows:', error);
   }

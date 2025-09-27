@@ -13,9 +13,9 @@
 
     <!-- Movie Cards -->
     <div v-else class="movie-grid">
-      <div 
-        v-for="movie in movies" 
-        :key="movie.id" 
+      <div
+        v-for="movie in movies"
+        :key="movie.id"
         class="movie-card"
         @click="goToMovieDetails(movie)"
       >
@@ -33,8 +33,8 @@
             @visible="onImageVisible"
           />
           <div class="movie-overlay">
-            <button 
-              class="action-button add-button" 
+            <button
+              class="action-button add-button"
               @click.stop="toggleWatchlist(movie)"
               :title="isMovieInWatchlist(movie.id) ? 'Remove from Watchlist' : 'Add to Watchlist'"
               :class="{ 'in-watchlist': isMovieInWatchlist(movie.id) }"
@@ -55,7 +55,7 @@
             <span>{{ movie.vote_average.toFixed(1) }}</span>
           </div>
         </div>
-        
+
         <div class="movie-content">
           <h3 class="movie-title">{{ movie.title }}</h3>
           <p class="movie-year" v-if="movie.release_date">
@@ -77,14 +77,13 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, watch } from 'vue';
-import { useRouter } from 'vue-router';
-import { invoke } from "@tauri-apps/api/core";
-import { fetchMovies } from '../../services/tmdbService';
-import { defineProps } from 'vue';
-import { useWatchlistStore } from '../../stores/watchlistStore';
 import { useToast } from '../../composables/useToast';
+import { fetchMovies } from '../../services/tmdbService';
+import { useWatchlistStore } from '../../stores/watchlistStore';
 import LazyImage from '../LazyImage.vue';
+import { invoke } from "@tauri-apps/api/core";
+import { defineProps, ref, onMounted, watch } from 'vue';
+import { useRouter } from 'vue-router';
 
 const props = defineProps<{ searchedMovies: any[] }>();
 
@@ -99,11 +98,11 @@ const { success, error } = useToast();
 const preloadedImages = ref(new Set<string>());
 
 // Image event handlers
-const onImageLoad = (event: Event) => {
+const onImageLoad = (_event: Event) => {
   // Optional: handle successful image loads
 };
 
-const onImageError = (event: Event) => {
+const onImageError = (_event: Event) => {
   // Optional: handle image load errors
 };
 
@@ -426,15 +425,15 @@ watch(() => props.searchedMovies, (newMovies) => {
   .movie-card {
     transition: none;
   }
-  
+
   .movie-poster {
     transition: none;
   }
-  
+
   .movie-card:hover {
     transform: none;
   }
-  
+
   .movie-card:hover .movie-poster {
     transform: none;
   }
@@ -464,7 +463,7 @@ watch(() => props.searchedMovies, (newMovies) => {
     grid-template-columns: repeat(3, 1fr);
     gap: var(--spacing-md);
   }
-  
+
   .movie-grid-container {
     padding: var(--spacing-md);
   }
@@ -475,28 +474,28 @@ watch(() => props.searchedMovies, (newMovies) => {
     grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-sm);
   }
-  
+
   .movie-grid-container {
     padding: var(--spacing-sm);
   }
-  
+
   .movie-content {
     padding: var(--spacing-sm);
   }
-  
+
   .movie-title {
     font-size: 0.875rem;
   }
-  
+
   .movie-year {
     font-size: 0.75rem;
   }
-  
+
   .action-button {
     width: 36px;
     height: 36px;
   }
-  
+
   .action-button svg {
     width: 16px;
     height: 16px;
@@ -508,7 +507,7 @@ watch(() => props.searchedMovies, (newMovies) => {
   .movie-card {
     transform: translateZ(0);
   }
-  
+
   .movie-overlay {
     transform: translateZ(0);
   }
@@ -519,14 +518,14 @@ watch(() => props.searchedMovies, (newMovies) => {
   .movie-grid-container {
     container-type: inline-size;
   }
-  
+
   @container (max-width: 600px) {
     .movie-grid {
       grid-template-columns: repeat(2, 1fr);
       gap: var(--spacing-sm);
     }
   }
-  
+
   @container (min-width: 1400px) {
     .movie-grid {
       grid-template-columns: repeat(7, 1fr);
