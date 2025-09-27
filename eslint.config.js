@@ -19,7 +19,8 @@ export default ts.config(
         ...globals.node
       },
       parserOptions: {
-        projectService: true
+        projectService: true,
+        extraFileExtensions: ['.vue']
       }
     },
     rules: {
@@ -28,7 +29,7 @@ export default ts.config(
       '@typescript-eslint/no-empty-function': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unused-vars': [
-        'error',
+        'warn',
         {
           argsIgnorePattern: '^_',
           varsIgnorePattern: '^_',
@@ -66,7 +67,7 @@ export default ts.config(
           pathGroupsExcludedImportTypes: ['builtin', 'external', 'object', 'type']
         }
       ],
-      'func-style': [2, 'declaration'],
+      'func-style': 'off',
       'no-return-await': 'off',
       // Vue-specific rules (add more as needed)
       'vue/multi-word-component-names': 'off',
@@ -89,7 +90,8 @@ export default ts.config(
     languageOptions: {
       parser: vueParser,
       parserOptions: {
-        parser: ts.parser
+        parser: ts.parser,
+        extraFileExtensions: ['.vue']
       }
     }
   },
