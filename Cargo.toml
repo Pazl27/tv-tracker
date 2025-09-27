@@ -11,10 +11,16 @@ authors = ["Pazl"]
 edition = "2021"
 version = "0.1.0"
 description = "TV show and movie tracker"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/Pazl27/tv-tracker"
+keywords = ["tv", "tracker", "movies", "shows", "management"]
+categories = ["tauri", "productivity", "applications"]
+rust-version = "1.86.0-nightly"
 
 [workspace.dependencies]
 logic = { path = "./crates/logic" }
-markdown-renderer = { path = "./crates/markdown-renderer" }
+markdown-renderer = { path = "./crates/markdown-renderer", features = ["html"] }
 
 tauri = { version = "2", features = [] }
 tauri-plugin-opener = "2"
