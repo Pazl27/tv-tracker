@@ -4,7 +4,7 @@ authors.workspace = true
 edition.workspace = true
 version.workspace = true
 description = "A fast and robust Markdown parser with AST generation and HTML rendering capabilities"
-licence.workspace = true
+license.workspace = true
 repository = "https://github.com/Pazl27/tv-tracker"
 readme = "README.md"
 keywords = ["markdown", "parser", "html", "ast", "renderer"]
@@ -20,9 +20,11 @@ full = ["html"]
 
 [dependencies]
 thiserror.workspace = true
+anyhow.workspace = true
 
 # For development and testing, we can enable all features by default
 [dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
 
 # Test with all features in dev builds
 [package.metadata.docs.rs]
@@ -40,3 +42,7 @@ required-features = []
 [[example]]
 name = "html_rendering"
 required-features = ["html"]
+
+[[bench]]
+name = "markdown_benchmarks"
+harness = false

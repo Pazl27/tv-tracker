@@ -16,7 +16,7 @@ readme = "README.md"
 repository = "https://github.com/Pazl27/tv-tracker"
 keywords = ["tv", "tracker", "movies", "shows", "management"]
 categories = ["tauri", "productivity", "applications"]
-rust-version = "1.86.0-nightly"
+rust-version = "1.70"
 
 [workspace.dependencies]
 logic = { path = "./crates/logic" }
