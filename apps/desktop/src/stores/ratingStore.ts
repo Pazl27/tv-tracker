@@ -48,7 +48,7 @@ export const useRatingStore = () => {
   // Load ratings
   const loadMovieRating = async (movieId: number) => {
     try {
-      const rating: number | null = await invoke('get_movie_rating', { movieId })
+      const rating: number | null = await invoke('get_movie_rating', { movieId: movieId })
       if (rating !== null) {
         movieRatings.value.set(movieId, rating)
       } else {
@@ -63,7 +63,7 @@ export const useRatingStore = () => {
 
   const loadTvShowRating = async (showId: number) => {
     try {
-      const rating: number | null = await invoke('get_tv_show_rating', { showId })
+      const rating: number | null = await invoke('get_tv_show_rating', { showId: showId })
       if (rating !== null) {
         tvShowRatings.value.set(showId, rating)
       } else {
@@ -195,7 +195,7 @@ export const useRatingStore = () => {
   // Remove ratings
   const removeMovieRating = async (movieId: number) => {
     try {
-      await invoke('remove_movie_rating', { movieId })
+      await invoke('remove_movie_rating', { movieId: movieId })
 
       // Update local state
       movieRatings.value.delete(movieId)
@@ -215,7 +215,7 @@ export const useRatingStore = () => {
 
   const removeTvShowRating = async (showId: number) => {
     try {
-      await invoke('remove_tv_show_rating', { showId })
+      await invoke('remove_tv_show_rating', { showId: showId })
 
       // Update local state
       tvShowRatings.value.delete(showId)

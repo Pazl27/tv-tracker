@@ -406,7 +406,7 @@ const saveNotes = async (newNotes: string) => {
 
   try {
     await invoke('update_movie_notes', {
-      movieId: movie.value.id,
+      movie: movie.value,
       notes: newNotes
     });
 

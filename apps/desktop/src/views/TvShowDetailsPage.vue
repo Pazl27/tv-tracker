@@ -377,7 +377,7 @@ const saveNotes = async (newNotes: string) => {
 
   try {
     await invoke('update_tv_show_notes', {
-      tvShowId: tvShow.value.id,
+      tvShow: tvShow.value,
       notes: newNotes
     });
 

@@ -282,19 +282,38 @@ pub async fn get_all_rated_tv_shows() -> Result<Vec<database::entities::WatchedT
 // Notes Commands
 
 #[tauri::command]
-pub async fn update_movie_notes(movie_id: i32, notes: String) -> Result<(), String> {
+pub async fn update_movie_notes(movie: serde_json::Value, notes: String) -> Result<(), String> {
     let conn = database::Sqlight::get_connection().map_err(|e| e.to_string())?;
     let db = conn.lock().expect("Failed to lock the mutex");
 
-    db.update_movie_notes(movie_id, &notes).map_err(|e| e.to_string())
+    // Create or update movie with notes using UPSERT
+    let movie_to_watch = database::entities::MovieToWatch {
+        id: movie["id"].as_i64().unwrap_or(0) as i32,
+        title: movie["title"].as_str().unwrap_or("").to_string(),
+        poster_path: movie["poster_path"].as_str().unwrap_or("").to_string(),
+        notes: notes,
+    };
+
+    db.insert_movie_to_watch(&movie_to_watch).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-pub async fn update_tv_show_notes(tv_show_id: i32, notes: String) -> Result<(), String> {
+pub async fn update_tv_show_notes(tv_show: serde_json::Value, notes: String) -> Result<(), String> {
     let conn = database::Sqlight::get_connection().map_err(|e| e.to_string())?;
     let db = conn.lock().expect("Failed to lock the mutex");
 
-    db.update_tv_show_notes(tv_show_id, &notes).map_err(|e| e.to_string())
+    // Create or update TV show with notes using UPSERT
+    let tv_show_to_watch = database::entities::TvShowToWatch {
+        id: tv_show["id"].as_i64().unwrap_or(0) as i32,
+        name: tv_show["name"].as_str().unwrap_or("").to_string(),
+        poster_path: tv_show["poster_path"].as_str().unwrap_or("").to_string(),
+        first_air_date: tv_show["first_air_date"].as_str().unwrap_or("").to_string(),
+        vote_average: tv_show["vote_average"].as_f64().unwrap_or(0.0) as f32,
+        overview: tv_show["overview"].as_str().unwrap_or("").to_string(),
+        notes: notes,
+    };
+
+    db.insert_tv_show_to_watch(&tv_show_to_watch).map_err(|e| e.to_string())
 }
 
 #[tauri::command]

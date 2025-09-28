@@ -108,7 +108,11 @@ const renderedHtml = ref('')
 const isRendering = ref(false)
 
 // Computed properties
-const hasChanges = computed(() => localValue.value !== props.modelValue)
+const hasChanges = computed(() => {
+  // Allow saving if there's content to save (even if it's new content)
+  // or if the content has changed from the original
+  return localValue.value.trim().length > 0 || localValue.value !== props.modelValue
+})
 
 // Methods
 const insertMarkdown = (before: string, after: string = '', placeholder: string = '') => {
